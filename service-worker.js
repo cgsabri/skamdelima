@@ -1,4 +1,4 @@
-const CACHE_NAME = "skamdelima-v15";
+const CACHE_NAME = "skamdelima-v16";
 
 const BASE = "/skamdelima/";
 
