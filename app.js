@@ -1220,3 +1220,92 @@ window.addEventListener(
   "DOMContentLoaded",
   loadPublicContent
 );
+
+// =====================================
+// QUICK ACCESS
+// =====================================
+
+function goToSearch() {
+
+  const searchCard =
+    document.querySelector(
+      ".search-card"
+    );
+
+  if (!searchCard) {
+    return;
+  }
+
+  searchCard.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+  setTimeout(() => {
+
+    const firstInput =
+      searchCard.querySelector(
+        "input"
+      );
+
+    if (firstInput) {
+      firstInput.focus();
+    }
+
+  }, 500);
+
+}
+
+
+// =====================================
+// QUICK TUTORIAL
+// =====================================
+
+function openQuickTutorial() {
+
+  const tutorial =
+    document.getElementById(
+      "tutorial"
+    );
+
+  if (!tutorial) {
+    return;
+  }
+
+  tutorial.classList.remove(
+    "hidden"
+  );
+
+  tutorial.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+}
+
+
+// =====================================
+// QUICK HELP
+// =====================================
+
+function openQuickHelp() {
+
+  const help =
+    document.getElementById(
+      "help"
+    );
+
+  if (!help) {
+    return;
+  }
+
+  help.classList.remove(
+    "hidden"
+  );
+
+  help.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+}
