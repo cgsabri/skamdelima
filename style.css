@@ -1651,3 +1651,282 @@ footer small {
   }
 
 }
+/* =====================================================
+   FINAL POLISH V4
+===================================================== */
+
+/* HEADER */
+.topbar {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.school-brand {
+  width: min(1035px, calc(100% - 30px));
+}
+
+.school-brand img {
+  width: 54px;
+  height: 54px;
+}
+
+.school-brand strong {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.school-brand span {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+
+/* MAIN DESKTOP WIDTH */
+main {
+  width: min(1035px, calc(100% - 30px));
+}
+
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.hero {
+  margin-top: 34px;
+
+  min-height: 330px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  padding: 55px;
+
+  border-radius: 30px;
+}
+
+.hero h1 {
+  max-width: 680px;
+
+  margin-top: 22px;
+  margin-bottom: 18px;
+
+  font-size: clamp(44px, 5vw, 66px);
+
+  line-height: .98;
+}
+
+.hero p {
+  max-width: 620px;
+
+  font-size: 16px;
+}
+
+.hero-badge {
+  width: fit-content;
+}
+
+
+/* =====================================================
+   QUICK ACCESS
+===================================================== */
+
+.quick-access {
+  margin-top: 24px;
+
+  gap: 16px;
+}
+
+.quick-card {
+  min-height: 160px;
+
+  padding: 23px;
+
+  border-radius: 20px;
+}
+
+.quick-icon {
+  width: 52px;
+  height: 52px;
+
+  font-size: 24px;
+
+  border-radius: 15px;
+}
+
+.quick-card strong {
+  font-size: 15px;
+}
+
+.quick-card span {
+  margin-top: 6px;
+
+  font-size: 11px;
+}
+
+
+/* =====================================================
+   SEARCH AREA
+===================================================== */
+
+.search-card {
+  margin-top: 28px;
+
+  padding: 38px;
+
+  border-radius: 25px;
+}
+
+.search-card h2 {
+  font-size: 27px;
+}
+
+
+/* =====================================================
+   SECTION SPACING
+===================================================== */
+
+.services {
+  padding-top: 45px;
+}
+
+.info-card {
+  margin-top: 22px;
+
+  padding: 30px;
+}
+
+
+/* =====================================================
+   FOOTER BRAND LINE
+===================================================== */
+
+.footer-system {
+  display: block;
+
+  margin-top: 14px;
+
+  color: rgba(255,255,255,.55);
+
+  font-size: 10px;
+
+  letter-spacing: .4px;
+}
+
+
+/* =====================================================
+   MOBILE FINAL POLISH
+===================================================== */
+
+@media(max-width:600px) {
+
+  .school-brand {
+    width: 100%;
+  }
+
+  .school-brand img {
+    width: 45px;
+    height: 45px;
+  }
+
+  .school-brand strong {
+    font-size: 13px;
+  }
+
+  .school-brand span {
+    font-size: 10px;
+  }
+
+
+  main {
+    width: calc(100% - 20px);
+  }
+
+
+  .hero {
+    min-height: 285px;
+
+    margin-top: 14px;
+
+    padding: 30px 23px;
+
+    border-radius: 22px;
+  }
+
+  .hero h1 {
+    margin-top: 18px;
+
+    font-size: 39px;
+
+    line-height: 1.02;
+  }
+
+  .hero p {
+    font-size: 13px;
+
+    line-height: 1.6;
+  }
+
+
+  .quick-access {
+    margin-top: 12px;
+
+    gap: 8px;
+  }
+
+  .quick-card {
+    min-height: 128px;
+
+    padding: 14px 11px;
+
+    border-radius: 15px;
+  }
+
+  .quick-icon {
+    width: 41px;
+    height: 41px;
+
+    margin-bottom: 12px;
+
+    font-size: 19px;
+
+    border-radius: 11px;
+  }
+
+  .quick-card strong {
+    font-size: 12px;
+  }
+
+  .quick-card span {
+    font-size: 9px;
+  }
+
+
+  .search-card {
+    margin-top: 18px;
+
+    padding: 23px 19px;
+  }
+
+}
+
+
+/* =====================================================
+   PHONE 380PX AND BELOW
+===================================================== */
+
+@media(max-width:380px) {
+
+  .hero {
+    min-height: 260px;
+  }
+
+  .hero h1 {
+    font-size: 34px;
+  }
+
+  .quick-card {
+    padding: 12px 9px;
+  }
+
+}
