@@ -1,4 +1,4 @@
-const CACHE_NAME = "delima-v11";
+const CACHE_NAME = "delima-v12";
 
 const FILES = [
   "./",
