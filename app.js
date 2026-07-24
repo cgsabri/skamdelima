@@ -1309,3 +1309,31 @@ function openQuickHelp() {
   });
 
 }
+// =====================================
+// SERVICE WORKER
+// =====================================
+
+if ("serviceWorker" in navigator) {
+
+  window.addEventListener("load", () => {
+
+    navigator.serviceWorker
+      .register("./service-worker.js", {
+        scope: "./"
+      })
+      .then(registration => {
+        console.log(
+          "Service Worker aktif:",
+          registration.scope
+        );
+      })
+      .catch(error => {
+        console.error(
+          "Service Worker gagal:",
+          error
+        );
+      });
+
+  });
+
+}
