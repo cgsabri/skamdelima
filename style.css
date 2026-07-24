@@ -1446,3 +1446,208 @@ footer small {
   }
 
 }
+
+/* =====================================================
+   QUICK ACCESS
+===================================================== */
+
+.quick-access {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 12px;
+
+  margin-top: 18px;
+  margin-bottom: 5px;
+}
+
+.quick-card {
+  position: relative;
+
+  min-height: 145px;
+
+  padding: 19px 16px;
+
+  overflow: hidden;
+
+  border: 1px solid var(--border);
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #fafcff
+    );
+
+  box-shadow:
+    0 8px 25px
+    rgba(15,40,75,.055);
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    border-color .2s ease;
+}
+
+.quick-card:hover {
+  transform:
+    translateY(-3px);
+
+  border-color:
+    #ced9e7;
+
+  box-shadow:
+    0 15px 32px
+    rgba(15,40,75,.10);
+}
+
+.quick-card:active {
+  transform:
+    scale(.98);
+}
+
+
+/* ICON */
+
+.quick-icon {
+  width: 47px;
+  height: 47px;
+
+  display: grid;
+
+  place-items: center;
+
+  margin-bottom: 16px;
+
+  border-radius: 14px;
+
+  font-size: 22px;
+}
+
+.quick-icon.search {
+  background: #edf4fc;
+}
+
+.quick-icon.tutorial {
+  background: #edf8f2;
+}
+
+.quick-icon.help {
+  background: #fff6e8;
+}
+
+
+/* TEXT */
+
+.quick-card strong {
+  display: block;
+
+  color: var(--navy-dark);
+
+  font-size: 14px;
+}
+
+.quick-card span {
+  display: block;
+
+  margin-top: 4px;
+
+  color: var(--muted);
+
+  font-size: 11px;
+}
+
+
+/* ARROW */
+
+.quick-arrow {
+  position: absolute;
+
+  right: 14px;
+  bottom: 12px;
+
+  color: #98a2b3;
+
+  font-size: 23px;
+
+  transition:
+    transform .2s ease;
+}
+
+.quick-card:hover
+.quick-arrow {
+  transform:
+    translateX(3px);
+
+  color: var(--navy);
+}
+
+
+/* MOBILE */
+
+@media(max-width:600px) {
+
+  .quick-access {
+    gap: 8px;
+  }
+
+  .quick-card {
+    min-height: 130px;
+
+    padding: 15px 12px;
+
+    border-radius: 15px;
+  }
+
+  .quick-icon {
+    width: 42px;
+    height: 42px;
+
+    margin-bottom: 12px;
+
+    border-radius: 12px;
+
+    font-size: 20px;
+  }
+
+  .quick-card strong {
+    font-size: 12px;
+  }
+
+  .quick-card span {
+    font-size: 9px;
+  }
+
+  .quick-arrow {
+    display: none;
+  }
+
+}
+
+
+@media(max-width:350px) {
+
+  .quick-access {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-card {
+    min-height: auto;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+  }
+
+  .quick-icon {
+    margin-bottom: 0;
+  }
+
+}
