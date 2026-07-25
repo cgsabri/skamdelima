@@ -206,9 +206,17 @@ function showAdminSection(section) {
     loadHelp();
   }
   
-  if (section === "chat") {
+ if (section === "chat") {
+
   loadAdminChats();
-  }
+
+  startAdminChatPolling();
+
+} else {
+
+  stopAdminChatPolling();
+
+}
   
 }
 
@@ -1719,6 +1727,136 @@ async function sendAdminChat() {
       button.disabled = false;
       button.textContent = "Hantar";
     }
+
+  }
+
+}
+
+// ======================================
+// LIVE CHAT - AUTO REFRESH
+// ======================================
+
+function startAdminChatPolling() {
+
+  // Elakkan timer berganda
+  stopAdminChatPolling();
+
+  adminChatTimer = setInterval(
+    async function() {
+
+      // Jangan buat apa-apa jika admin belum login
+      if (!sessionToken) {
+        return;
+      }
+
+      // Pastikan tab Live Chat sedang dibuka
+      const chatSection =
+        document.getElementById(
+          "chatSection"
+        );
+
+      if (
+        !chatSection ||
+        chatSection.classList.contains("hidden")
+      ) {
+        return;
+      }
+
+      try {
+
+        // Refresh senarai perbualan
+        await loadAdminChats();
+
+        // Jika ada chat sedang dibuka,
+        // refresh mesej chat tersebut
+        if (activeAdminChatId) {
+
+          await refreshActiveAdminChat();
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Auto refresh chat:",
+          error
+        );
+
+      }
+
+    },
+
+    5000
+  );
+
+}
+
+
+// ======================================
+// STOP AUTO REFRESH
+// ======================================
+
+function stopAdminChatPolling() {
+
+  if (adminChatTimer) {
+
+    clearInterval(
+      adminChatTimer
+    );
+
+    adminChatTimer = null;
+
+  }
+
+}
+
+
+// ======================================
+// REFRESH CHAT YANG SEDANG DIBUKA
+// ======================================
+
+async function refreshActiveAdminChat() {
+
+  if (!activeAdminChatId) {
+    return;
+  }
+
+  try {
+
+    const data =
+      await apiRequest(
+        "getAdminChatMessages",
+        {
+          chatId: activeAdminChatId
+        }
+      );
+
+
+    if (!data.success) {
+
+      handleApiFailure(data);
+      return;
+
+    }
+
+
+    const messages =
+      Array.isArray(data.messages)
+        ? data.messages
+        : [];
+
+
+    renderAdminChatMessages(
+      messages
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Refresh active chat:",
+      error
+    );
 
   }
 
