@@ -508,7 +508,88 @@
 
 </footer>
 
+<!-- =========================================
+     CHAT BANTUAN ICT
+========================================= -->
 
+<button
+  id="chatButton"
+  class="chat-float"
+  type="button"
+  aria-label="Buka Bantuan ICT">
+  💬
+  <span class="chat-badge">1</span>
+</button>
+
+<div
+  id="chatPanel"
+  class="chat-panel"
+  aria-hidden="true">
+
+  <div class="chat-header">
+
+    <div class="chat-avatar">🧑‍💻</div>
+
+    <div class="chat-title">
+      <strong>Bantuan ICT</strong>
+      <span>SK Agama (MIS) Miri</span>
+    </div>
+
+    <button
+      id="closeChat"
+      class="chat-close"
+      type="button"
+      aria-label="Tutup Bantuan ICT">
+      ×
+    </button>
+
+  </div>
+
+  <div class="chat-body">
+
+    <div class="bot-message">
+      <div class="bot-bubble">
+        Assalamualaikum 👋
+        <br><br>
+        Ada masalah dengan DELIMa?
+        Pilih bantuan di bawah.
+      </div>
+    </div>
+
+    <div class="chat-options">
+
+      <button type="button" data-help="password">
+        🔑 <span>Lupa Kata Laluan</span>
+      </button>
+
+      <button type="button" data-help="id">
+        👤 <span>Masalah ID DELIMa</span>
+      </button>
+
+      <button type="button" data-help="login">
+        🔐 <span>Tidak Boleh Log Masuk</span>
+      </button>
+
+      <button type="button" data-help="classroom">
+        📚 <span>Google Classroom</span>
+      </button>
+
+      <button type="button" data-help="other">
+        ❓ <span>Masalah Lain</span>
+      </button>
+
+    </div>
+
+    <div id="chatAnswer"></div>
+
+  </div>
+
+  <div class="chat-footer">
+    Bantuan ICT • SK Agama (MIS) Miri
+  </div>
+
+</div>
+  
 <script src="app.js?v=8"></script>
 
 <script>
