@@ -1257,7 +1257,8 @@ async function loadAdminChats() {
       Array.isArray(data.chats)
         ? data.chats
         : [];
-
+adminChatConversations = chats;
+    
     if (count) {
       count.textContent =
         chats.length;
