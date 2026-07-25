@@ -1337,3 +1337,153 @@ if ("serviceWorker" in navigator) {
   });
 
 }
+// =========================================
+// CHAT BANTUAN ICT
+// =========================================
+
+const chatButton =
+  document.getElementById("chatButton");
+
+const chatPanel =
+  document.getElementById("chatPanel");
+
+const closeChat =
+  document.getElementById("closeChat");
+
+const chatAnswer =
+  document.getElementById("chatAnswer");
+
+
+if (chatButton && chatPanel) {
+
+  chatButton.addEventListener("click", function () {
+
+    chatPanel.classList.toggle("active");
+
+    const isOpen =
+      chatPanel.classList.contains("active");
+
+    chatPanel.setAttribute(
+      "aria-hidden",
+      isOpen ? "false" : "true"
+    );
+
+    const badge =
+      document.querySelector(".chat-badge");
+
+    if (badge) {
+      badge.style.display = "none";
+    }
+
+  });
+
+}
+
+
+if (closeChat && chatPanel) {
+
+  closeChat.addEventListener("click", function () {
+
+    chatPanel.classList.remove("active");
+
+    chatPanel.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+  });
+
+}
+
+
+// =========================================
+// PILIHAN CHAT
+// =========================================
+
+document
+  .querySelectorAll(".chat-options button")
+  .forEach(function (button) {
+
+    button.addEventListener("click", function () {
+
+      const type =
+        button.getAttribute("data-help");
+
+      let answer = "";
+
+
+      if (type === "password") {
+
+        answer = `
+          🔑 <strong>Lupa Kata Laluan</strong>
+          <br><br>
+          Gunakan menu <strong>Semak ID</strong>.
+          Masukkan No. KP/MyKid murid dan PIN penjaga
+          untuk melihat maklumat akaun DELIMa.
+        `;
+
+      }
+
+
+      else if (type === "id") {
+
+        answer = `
+          👤 <strong>Masalah ID DELIMa</strong>
+          <br><br>
+          Pastikan No. KP/MyKid murid dimasukkan
+          dengan betul. Jika akaun masih tidak
+          ditemui, sila hubungi pihak ICT sekolah.
+        `;
+
+      }
+
+
+      else if (type === "login") {
+
+        answer = `
+          🔐 <strong>Tidak Boleh Log Masuk</strong>
+          <br><br>
+          Pastikan ID DELIMa dan kata laluan
+          dimasukkan dengan tepat. Pastikan juga
+          tiada ruang kosong semasa menyalin.
+        `;
+
+      }
+
+
+      else if (type === "classroom") {
+
+        answer = `
+          📚 <strong>Google Classroom</strong>
+          <br><br>
+          Sila buka bahagian <strong>Tutorial</strong>
+          untuk melihat panduan Google Classroom.
+        `;
+
+      }
+
+
+      else {
+
+        answer = `
+          🧑‍💻 <strong>Bantuan Lanjut</strong>
+          <br><br>
+          Sila buka bahagian <strong>Bantuan ICT</strong>
+          untuk menghubungi pihak ICT sekolah.
+        `;
+
+      }
+
+
+      if (chatAnswer) {
+
+        chatAnswer.innerHTML =
+          `<div class="chat-answer-bubble">
+             ${answer}
+           </div>`;
+
+      }
+
+    });
+
+  });
