@@ -10,7 +10,7 @@
 
   <title>Admin | Portal Pengurusan DELIMa</title>
 
-  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="admin-livechat.css?v=19">
   <link rel="icon" href="assets/icon-192.png">
 </head>
 
@@ -184,6 +184,17 @@
 
         <span>🆘</span>
         Bantuan ICT
+
+      </button>
+
+      <button
+        id="tabChat"
+        class="tab chat-tab"
+        onclick="showAdminSection('chat')">
+
+        <span>💬</span>
+        Live Chat
+        <b id="chatUnreadBadge" class="chat-unread-badge hidden">0</b>
 
       </button>
 
@@ -517,6 +528,69 @@
 
     </section>
 
+
+    <!-- =================================
+         LIVE CHAT
+    ================================= -->
+
+    <section id="chatSection" class="admin-section hidden">
+      <div class="panel chat-admin-panel">
+
+        <div class="panel-header">
+          <div>
+            <h2>💬 Live Chat Ibu Bapa</h2>
+            <p>Baca dan balas mesej ibu bapa secara terus.</p>
+          </div>
+          <button class="secondary-btn" type="button"
+                  onclick="loadAdminChats(true)">↻ Refresh</button>
+        </div>
+
+        <div id="chatAdminMessage"></div>
+
+        <div class="admin-chat-layout">
+          <aside class="admin-chat-sidebar">
+            <div class="admin-chat-sidebar-title">
+              <strong>Perbualan</strong>
+              <span id="chatConversationCount">0</span>
+            </div>
+            <div id="chatConversationList" class="admin-chat-list">
+              <div class="chat-empty">Tiada perbualan.</div>
+            </div>
+          </aside>
+
+          <section class="admin-chat-room">
+            <div id="chatRoomEmpty" class="chat-room-empty">
+              <span>💬</span>
+              <strong>Pilih perbualan</strong>
+              <p>Pilih ibu bapa di sebelah untuk membaca dan membalas mesej.</p>
+            </div>
+
+            <div id="chatRoomActive" class="hidden">
+              <div class="admin-chat-room-header">
+                <div>
+                  <strong id="activeChatName">Ibu Bapa</strong>
+                  <span id="activeChatMeta">-</span>
+                </div>
+                <button id="closeConversationBtn" type="button"
+                        class="chat-close-conversation"
+                        onclick="closeAdminConversation()">Tutup Perbualan</button>
+              </div>
+
+              <div id="adminChatMessages" class="admin-chat-messages"></div>
+
+              <form class="admin-chat-compose" onsubmit="sendAdminChat(event)">
+                <textarea id="adminChatInput" rows="2" maxlength="1000"
+                          placeholder="Taip balasan kepada ibu bapa..."
+                          onkeydown="adminChatKeydown(event)"></textarea>
+                <button id="adminChatSendBtn" class="primary-small"
+                        type="submit">Hantar</button>
+              </form>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
   </main>
 
 </section>
@@ -662,7 +736,7 @@
 </div>
 
 
-<script src="admin.js"></script>
+<script src="admin-livechat.js?v=19"></script>
 
 </body>
 </html>
