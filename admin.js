@@ -6,6 +6,13 @@ let sessionToken = "";
 let allStudents = [];
 let allTutorials = [];
 
+// ======================================
+// LIVE CHAT
+// ======================================
+
+let adminChatConversations = [];
+let activeAdminChatId = "";
+let adminChatTimer = null;
 
 // ======================================
 // LOGIN
