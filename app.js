@@ -1449,3 +1449,693 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
 });
+// ======================================================
+// LIVE CHAT PARENT
+// ======================================================
+
+const LIVE_CHAT_API =
+  "https://script.google.com/macros/s/AKfycbzWvfXVDh6y2ttNc3ySkVcymqEfgmsI7K-wwGY4ve_m_y78HfVIi55k7kyzllgGVnB4/exec";
+
+let liveChatId = "";
+let liveChatSessionId = "";
+let liveChatTimer = null;
+
+
+// ------------------------------------------------------
+// ELEMENTS
+// ------------------------------------------------------
+
+const startLiveChatBtn =
+  document.getElementById("startLiveChatBtn");
+
+const liveChatArea =
+  document.getElementById("liveChatArea");
+
+const chatLogin =
+  document.getElementById("chatLogin");
+
+const chatConversation =
+  document.getElementById("chatConversation");
+
+const chatLoginBtn =
+  document.getElementById("chatLoginBtn");
+
+const chatNokp =
+  document.getElementById("chatNokp");
+
+const chatPin =
+  document.getElementById("chatPin");
+
+const chatLoginMessage =
+  document.getElementById("chatLoginMessage");
+
+const chatStudentName =
+  document.getElementById("chatStudentName");
+
+const chatStudentClass =
+  document.getElementById("chatStudentClass");
+
+const liveMessages =
+  document.getElementById("liveMessages");
+
+const liveMessageInput =
+  document.getElementById("liveMessageInput");
+
+const sendLiveMessageBtn =
+  document.getElementById("sendLiveMessageBtn");
+
+
+// ------------------------------------------------------
+// BUKA LIVE CHAT
+// ------------------------------------------------------
+
+if (startLiveChatBtn) {
+
+  startLiveChatBtn.addEventListener(
+    "click",
+    function () {
+
+      if (!liveChatArea) return;
+
+      liveChatArea.classList.remove("hidden");
+
+      // sembunyikan jawapan FAQ
+      const faqAnswer =
+        document.getElementById("chatAnswer");
+
+      if (faqAnswer) {
+        faqAnswer.innerHTML = "";
+      }
+
+      liveChatArea.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+      });
+
+    }
+  );
+
+}
+
+
+// ------------------------------------------------------
+// LOGIN / VERIFY PARENT
+// ------------------------------------------------------
+
+if (chatLoginBtn) {
+
+  chatLoginBtn.addEventListener(
+    "click",
+    async function () {
+
+      const nokp =
+        String(chatNokp?.value || "")
+          .replace(/\D/g, "");
+
+      const pin =
+        String(chatPin?.value || "")
+          .replace(/\D/g, "");
+
+
+      if (
+        nokp.length !== 12 ||
+        pin.length !== 4
+      ) {
+
+        showChatLoginMessage(
+          "Sila masukkan No. KP/MyKid dan PIN yang betul.",
+          false
+        );
+
+        return;
+      }
+
+
+      chatLoginBtn.disabled = true;
+      chatLoginBtn.textContent =
+        "Mengesahkan...";
+
+
+      try {
+
+        const url =
+          LIVE_CHAT_API +
+          "?action=startChat" +
+          "&nokp=" +
+          encodeURIComponent(nokp) +
+          "&pin=" +
+          encodeURIComponent(pin) +
+          "&_=" +
+          Date.now();
+
+
+        const response =
+          await fetch(url);
+
+
+        const data =
+          await response.json();
+
+
+        if (!data.success) {
+
+          showChatLoginMessage(
+            data.message ||
+            "Pengesahan gagal.",
+            false
+          );
+
+          return;
+        }
+
+
+        liveChatId =
+          data.chatId;
+
+        liveChatSessionId =
+          data.sessionId;
+
+
+        // Simpan sesi dalam browser
+        sessionStorage.setItem(
+          "delima_chat_id",
+          liveChatId
+        );
+
+        sessionStorage.setItem(
+          "delima_chat_session",
+          liveChatSessionId
+        );
+
+
+        if (chatStudentName) {
+
+          chatStudentName.textContent =
+            data.student?.nama ||
+            "Murid";
+
+        }
+
+
+        if (chatStudentClass) {
+
+          chatStudentClass.textContent =
+            data.student?.kelas || "";
+
+        }
+
+
+        chatLogin.classList.add(
+          "hidden"
+        );
+
+        chatConversation.classList.remove(
+          "hidden"
+        );
+
+
+        // kosongkan PIN selepas berjaya
+        if (chatPin) {
+          chatPin.value = "";
+        }
+
+
+        await loadLiveMessages();
+
+
+        // Semak balasan admin setiap 5 saat
+        startLiveChatPolling();
+
+
+        if (liveMessageInput) {
+          liveMessageInput.focus();
+        }
+
+
+      } catch (error) {
+
+        console.error(
+          "Live Chat login error:",
+          error
+        );
+
+        showChatLoginMessage(
+          "Tidak dapat menghubungi sistem chat. Cuba semula.",
+          false
+        );
+
+
+      } finally {
+
+        chatLoginBtn.disabled = false;
+
+        chatLoginBtn.textContent =
+          "Mula Chat";
+
+      }
+
+    }
+  );
+
+}
+
+
+// ------------------------------------------------------
+// HANTAR MESEJ
+// ------------------------------------------------------
+
+if (sendLiveMessageBtn) {
+
+  sendLiveMessageBtn.addEventListener(
+    "click",
+    sendLiveMessage
+  );
+
+}
+
+
+if (liveMessageInput) {
+
+  liveMessageInput.addEventListener(
+    "keydown",
+    function (event) {
+
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey
+      ) {
+
+        event.preventDefault();
+
+        sendLiveMessage();
+
+      }
+
+    }
+  );
+
+}
+
+
+async function sendLiveMessage() {
+
+  if (
+    !liveChatId ||
+    !liveChatSessionId
+  ) {
+
+    return;
+  }
+
+
+  const message =
+    String(
+      liveMessageInput?.value || ""
+    ).trim();
+
+
+  if (!message) {
+    return;
+  }
+
+
+  if (message.length > 1000) {
+    alert("Mesej terlalu panjang.");
+    return;
+  }
+
+
+  sendLiveMessageBtn.disabled = true;
+
+
+  try {
+
+    const url =
+      LIVE_CHAT_API +
+      "?action=sendChatMessage" +
+      "&chatId=" +
+      encodeURIComponent(
+        liveChatId
+      ) +
+      "&sessionId=" +
+      encodeURIComponent(
+        liveChatSessionId
+      ) +
+      "&message=" +
+      encodeURIComponent(
+        message
+      ) +
+      "&_=" +
+      Date.now();
+
+
+    const response =
+      await fetch(url);
+
+
+    const data =
+      await response.json();
+
+
+    if (!data.success) {
+
+      if (data.expired) {
+
+        handleChatExpired();
+
+        return;
+
+      }
+
+
+      alert(
+        data.message ||
+        "Mesej gagal dihantar."
+      );
+
+      return;
+
+    }
+
+
+    liveMessageInput.value = "";
+
+
+    await loadLiveMessages();
+
+
+  } catch (error) {
+
+    console.error(
+      "Send chat error:",
+      error
+    );
+
+    alert(
+      "Tidak dapat menghantar mesej."
+    );
+
+
+  } finally {
+
+    sendLiveMessageBtn.disabled =
+      false;
+
+    if (liveMessageInput) {
+      liveMessageInput.focus();
+    }
+
+  }
+
+}
+
+
+// ------------------------------------------------------
+// LOAD MESEJ
+// ------------------------------------------------------
+
+async function loadLiveMessages() {
+
+  if (
+    !liveChatId ||
+    !liveChatSessionId
+  ) {
+
+    return;
+  }
+
+
+  try {
+
+    const url =
+      LIVE_CHAT_API +
+      "?action=getChatMessages" +
+      "&chatId=" +
+      encodeURIComponent(
+        liveChatId
+      ) +
+      "&sessionId=" +
+      encodeURIComponent(
+        liveChatSessionId
+      ) +
+      "&_=" +
+      Date.now();
+
+
+    const response =
+      await fetch(url);
+
+
+    const data =
+      await response.json();
+
+
+    if (!data.success) {
+
+      if (data.expired) {
+        handleChatExpired();
+      }
+
+      return;
+    }
+
+
+    renderLiveMessages(
+      data.messages || []
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Load chat error:",
+      error
+    );
+
+  }
+
+}
+
+
+// ------------------------------------------------------
+// PAPAR MESEJ
+// ------------------------------------------------------
+
+function renderLiveMessages(messages) {
+
+  if (!liveMessages) return;
+
+
+  if (!messages.length) {
+
+    liveMessages.innerHTML = `
+      <div
+        style="
+          text-align:center;
+          color:#98a2b3;
+          font-size:10px;
+          padding:25px 10px;
+        ">
+        👋 Perbualan telah dibuka.<br>
+        Taip mesej untuk menghubungi Admin ICT.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  liveMessages.innerHTML =
+    messages
+      .map(item => {
+
+        const sender =
+          item.sender === "ADMIN"
+            ? "admin"
+            : "parent";
+
+
+        const senderName =
+          item.sender === "ADMIN"
+            ? "Admin ICT"
+            : "Anda";
+
+
+        const time =
+          formatLiveChatTime(
+            item.timestamp
+          );
+
+
+        return `
+          <div class="live-message ${sender}">
+            <strong>
+              ${senderName}
+            </strong>
+
+            <div>
+              ${escapeLiveChatHTML(
+                item.message
+              )}
+            </div>
+
+            <span class="live-message-time">
+              ${time}
+            </span>
+          </div>
+        `;
+
+      })
+      .join("");
+
+
+  liveMessages.scrollTop =
+    liveMessages.scrollHeight;
+
+}
+
+
+// ------------------------------------------------------
+// AUTO REFRESH
+// ------------------------------------------------------
+
+function startLiveChatPolling() {
+
+  if (liveChatTimer) {
+    clearInterval(liveChatTimer);
+  }
+
+
+  liveChatTimer =
+    setInterval(
+      loadLiveMessages,
+      5000
+    );
+
+}
+
+
+// ------------------------------------------------------
+// SESSION EXPIRED
+// ------------------------------------------------------
+
+function handleChatExpired() {
+
+  if (liveChatTimer) {
+
+    clearInterval(
+      liveChatTimer
+    );
+
+    liveChatTimer = null;
+
+  }
+
+
+  liveChatId = "";
+  liveChatSessionId = "";
+
+
+  sessionStorage.removeItem(
+    "delima_chat_id"
+  );
+
+  sessionStorage.removeItem(
+    "delima_chat_session"
+  );
+
+
+  if (chatConversation) {
+
+    chatConversation.classList.add(
+      "hidden"
+    );
+
+  }
+
+
+  if (chatLogin) {
+
+    chatLogin.classList.remove(
+      "hidden"
+    );
+
+  }
+
+
+  showChatLoginMessage(
+    "Sesi chat telah tamat. Sila sahkan semula maklumat murid.",
+    false
+  );
+
+}
+
+
+// ------------------------------------------------------
+// MESSAGE LOGIN
+// ------------------------------------------------------
+
+function showChatLoginMessage(
+  message,
+  success
+) {
+
+  if (!chatLoginMessage) return;
+
+
+  chatLoginMessage.textContent =
+    message;
+
+
+  chatLoginMessage.style.color =
+    success
+      ? "#16803c"
+      : "#b42318";
+
+}
+
+
+// ------------------------------------------------------
+// FORMAT TIME
+// ------------------------------------------------------
+
+function formatLiveChatTime(value) {
+
+  if (!value) return "";
+
+
+  try {
+
+    return new Date(value)
+      .toLocaleTimeString(
+        "ms-MY",
+        {
+          hour: "2-digit",
+          minute: "2-digit"
+        }
+      );
+
+
+  } catch {
+
+    return "";
+
+  }
+
+}
+
+
+// ------------------------------------------------------
+// SECURITY - ESCAPE MESSAGE
+// ------------------------------------------------------
+
+function escapeLiveChatHTML(value) {
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
