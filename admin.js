@@ -15,7 +15,7 @@
 // gantikan URL di bawah dengan URL tersebut.
 
 const API_URL =
-  "MASUKKAN_URL_GOOGLE_APPS_SCRIPT_CIKGU_DI_SINI";
+  "https://script.google.com/macros/s/AKfycbzWvfXVDh6y2ttNc3ySkVcymqEfgmsI7K-wwGY4ve_m_y78HfVIi55k7kyzllgGVnB4/exec";
 
 
 // ======================================================
