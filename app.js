@@ -1341,60 +1341,179 @@ if ("serviceWorker" in navigator) {
 // CHAT BANTUAN ICT
 // =========================================
 
-const chatButton =
-  document.getElementById("chatButton");
+// ==========================================
+// CHAT BANTUAN ICT
+// ==========================================
 
-const chatPanel =
-  document.getElementById("chatPanel");
+document.addEventListener("DOMContentLoaded", function () {
 
-const closeChat =
-  document.getElementById("closeChat");
+  const chatButton = document.getElementById("chatButton");
+  const chatPanel = document.getElementById("chatPanel");
+  const closeChat = document.getElementById("closeChat");
+  const chatAnswer = document.getElementById("chatAnswer");
+  const chatBadge = document.querySelector(".chat-badge");
 
-const chatAnswer =
-  document.getElementById("chatAnswer");
+  console.log("Chat ICT ready:", {
+    button: !!chatButton,
+    panel: !!chatPanel
+  });
+
+  // BUKA / TUTUP CHAT
+  if (chatButton && chatPanel) {
+
+    chatButton.addEventListener("click", function () {
+
+      chatPanel.classList.toggle("active");
+
+      const isOpen =
+        chatPanel.classList.contains("active");
+
+      chatPanel.setAttribute(
+        "aria-hidden",
+        isOpen ? "false" : "true"
+      );
+
+      if (chatBadge) {
+        chatBadge.style.display = "none";
+      }
+
+    });
+
+  }
 
 
-if (chatButton && chatPanel) {
+  // BUTANG X
+  if (closeChat && chatPanel) {
 
-  chatButton.addEventListener("click", function () {
+    closeChat.addEventListener("click", function () {
 
-    chatPanel.classList.toggle("active");
+      chatPanel.classList.remove("active");
 
-    const isOpen =
-      chatPanel.classList.contains("active");
+      chatPanel.setAttribute(
+        "aria-hidden",
+        "true"
+      );
 
-    chatPanel.setAttribute(
-      "aria-hidden",
-      isOpen ? "false" : "true"
-    );
+    });
 
-    const badge =
-      document.querySelector(".chat-badge");
+  }
 
-    if (badge) {
-      badge.style.display = "none";
+
+  // PILIHAN BANTUAN
+  document
+    .querySelectorAll(".chat-options button")
+    .forEach(function (button) {
+
+      button.addEventListener("click", function () {
+
+        const type =
+          button.getAttribute("data-help");
+
+        let answer = "";
+
+
+        if (type === "password") {
+
+          answer = `
+            🔑 <strong>Lupa Kata Laluan</strong>
+            <br><br>
+            Gunakan menu <strong>Semak ID</strong>
+            pada portal. Masukkan No. KP/MyKid murid
+            dan PIN penjaga untuk melihat maklumat
+            akaun DELIMa.
+          `;
+
+        }
+
+
+        else if (type === "id") {
+
+          answer = `
+            👤 <strong>Masalah ID DELIMa</strong>
+            <br><br>
+            Pastikan No. KP/MyKid murid dimasukkan
+            dengan betul. Jika akaun masih tidak
+            ditemui, sila hubungi pihak ICT sekolah.
+          `;
+
+        }
+
+
+        else if (type === "login") {
+
+          answer = `
+            🔐 <strong>Tidak Boleh Log Masuk</strong>
+            <br><br>
+            Pastikan ID DELIMa dan kata laluan
+            dimasukkan dengan tepat. Pastikan juga
+            tiada ruang kosong semasa menyalin.
+          `;
+
+        }
+
+
+        else if (type === "classroom") {
+
+          answer = `
+            📚 <strong>Google Classroom</strong>
+            <br><br>
+            Sila buka bahagian
+            <strong>Tutorial</strong> untuk melihat
+            panduan Google Classroom.
+          `;
+
+        }
+
+
+        else {
+
+          answer = `
+            🧑‍💻 <strong>Bantuan Lanjut</strong>
+            <br><br>
+            Sila buka bahagian
+            <strong>Bantuan ICT</strong> untuk
+            mendapatkan bantuan daripada pihak ICT
+            sekolah.
+          `;
+
+        }
+
+
+        if (chatAnswer) {
+
+          chatAnswer.innerHTML = `
+            <div class="chat-answer-bubble">
+              ${answer}
+            </div>
+          `;
+
+        }
+
+      });
+
+    });
+
+
+  // TEKAN ESC UNTUK TUTUP
+  document.addEventListener("keydown", function (event) {
+
+    if (
+      event.key === "Escape" &&
+      chatPanel
+    ) {
+
+      chatPanel.classList.remove("active");
+
+      chatPanel.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
     }
 
   });
 
-}
-
-
-if (closeChat && chatPanel) {
-
-  closeChat.addEventListener("click", function () {
-
-    chatPanel.classList.remove("active");
-
-    chatPanel.setAttribute(
-      "aria-hidden",
-      "true"
-    );
-
-  });
-
-}
-
+});
 
 // =========================================
 // PILIHAN CHAT
