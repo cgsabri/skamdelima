@@ -1198,7 +1198,150 @@ async function saveHelp() {
 
 }
 
+// ======================================
+// LIVE CHAT - LOAD CONVERSATIONS
+// ======================================
 
+async function loadAdminChats() {
+
+  const list =
+    document.getElementById(
+      "chatConversationList"
+    );
+
+  const count =
+    document.getElementById(
+      "chatConversationCount"
+    );
+
+  if (!list) {
+    return;
+  }
+
+  list.innerHTML =
+    '<div class="chat-empty">' +
+    'Sedang memuatkan perbualan...' +
+    '</div>';
+
+  try {
+
+    const data =
+      await apiRequest(
+        "getAdminChats"
+      );
+
+    if (!data.success) {
+
+      handleApiFailure(data);
+
+      list.innerHTML =
+        '<div class="chat-empty">' +
+        escapeHTML(
+          data.message ||
+          "Tidak dapat memuatkan chat."
+        ) +
+        '</div>';
+
+      return;
+    }
+
+    const chats =
+      Array.isArray(data.chats)
+        ? data.chats
+        : [];
+
+    if (count) {
+      count.textContent =
+        chats.length;
+    }
+
+    list.innerHTML = "";
+
+    if (chats.length === 0) {
+
+      list.innerHTML =
+        '<div class="chat-empty">' +
+        'Belum ada perbualan.' +
+        '</div>';
+
+      return;
+    }
+
+    chats.forEach(chat => {
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+      button.type =
+        "button";
+
+      button.className =
+        "admin-chat-item";
+
+      const student =
+        chat.studentId ||
+        "Ibu Bapa";
+
+      const message =
+        chat.lastMessage ||
+        "Mesej baharu";
+
+      const unread =
+        Number(
+          chat.unread || 0
+        );
+
+      button.innerHTML =
+        "<strong>" +
+        escapeHTML(student) +
+        "</strong>" +
+
+        "<p>" +
+        escapeHTML(message) +
+        "</p>" +
+
+        (
+          unread > 0
+            ?
+            '<span class="chat-item-unread">' +
+            unread +
+            "</span>"
+            :
+            ""
+        );
+
+      button.onclick =
+        function() {
+
+          openAdminChat(
+            chat.chatId
+          );
+
+        };
+
+      list.appendChild(
+        button
+      );
+
+    });
+
+  } catch (error) {
+
+    console.error(
+      "Load chat error:",
+      error
+    );
+
+    list.innerHTML =
+      '<div class="chat-empty">' +
+      'Ralat memuatkan Live Chat.' +
+      '</div>';
+
+  }
+
+}
 // ======================================
 // API
 // ======================================
