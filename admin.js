@@ -147,7 +147,8 @@ function showAdminSection(section) {
   const sections = [
   "students",
   "tutorial",
-  "help"
+  "help",
+  "chat"
 ];
 
 
@@ -204,7 +205,10 @@ function showAdminSection(section) {
   if (section === "help") {
     loadHelp();
   }
-
+  
+  if (section === "chat") {
+  loadAdminChats();
+  }
   
 }
 
