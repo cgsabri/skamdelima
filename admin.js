@@ -1620,6 +1620,111 @@ function renderAdminChatMessages(
 }
 
 // ======================================
+// LIVE CHAT - SEND ADMIN REPLY
+// ======================================
+
+async function sendAdminChat() {
+
+  const input =
+    document.getElementById("adminChatInput");
+
+  const button =
+    document.getElementById("adminChatSendBtn");
+
+
+  if (!input) {
+    console.error("adminChatInput tidak dijumpai");
+    return;
+  }
+
+
+  if (!activeAdminChatId) {
+    alert("Sila pilih perbualan dahulu.");
+    return;
+  }
+
+
+  const message =
+    input.value.trim();
+
+
+  if (!message) {
+    return;
+  }
+
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Menghantar...";
+  }
+
+
+  try {
+
+    const data =
+      await apiRequest(
+        "sendAdminReply",
+        {
+          chatId: activeAdminChatId,
+          message: message
+        }
+      );
+
+
+    if (!data.success) {
+
+      handleApiFailure(data);
+
+      alert(
+        data.message ||
+        "Mesej tidak berjaya dihantar."
+      );
+
+      return;
+    }
+
+
+    // Kosongkan input selepas berjaya
+    input.value = "";
+
+
+    // Baca semula perbualan
+    await openAdminChat(
+      activeAdminChatId
+    );
+
+
+    // Refresh senarai chat
+    await loadAdminChats();
+
+
+    input.focus();
+
+
+  } catch (error) {
+
+    console.error(
+      "Send admin reply:",
+      error
+    );
+
+    alert(
+      "Ralat semasa menghantar mesej."
+    );
+
+
+  } finally {
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = "Hantar";
+    }
+
+  }
+
+}
+
+// ======================================
 // API
 // ======================================
 
