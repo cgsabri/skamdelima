@@ -144,11 +144,12 @@ function showDashboard() {
 
 function showAdminSection(section) {
 
-  const sections = [
-    "students",
-    "tutorial",
-    "help"
-  ];
+  cconst sections = [
+  "students",
+  "tutorial",
+  "help",
+  "chat"
+];
 
 
   sections.forEach(name => {
@@ -205,6 +206,9 @@ function showAdminSection(section) {
     loadHelp();
   }
 
+  if (section === "chat") {
+  loadAdminChats();
+  }
 }
 
 
