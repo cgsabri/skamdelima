@@ -1337,272 +1337,115 @@ if ("serviceWorker" in navigator) {
   });
 
 }
-// =========================================
-// CHAT BANTUAN ICT
-// =========================================
-
 // ==========================================
-// CHAT BANTUAN ICT
+// CHAT BANTUAN ICT - FINAL
 // ==========================================
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  const chatButton = document.getElementById("chatButton");
-  const chatPanel = document.getElementById("chatPanel");
-  const closeChat = document.getElementById("closeChat");
-  const chatAnswer = document.getElementById("chatAnswer");
-  const chatBadge = document.querySelector(".chat-badge");
+  const btn = document.getElementById("chatButton");
+  const panel = document.getElementById("chatPanel");
+  const closeBtn = document.getElementById("closeChat");
+  const answerBox = document.getElementById("chatAnswer");
+  const badge = document.querySelector(".chat-badge");
 
-  console.log("Chat ICT ready:", {
-    button: !!chatButton,
-    panel: !!chatPanel
-  });
-
-  // BUKA / TUTUP CHAT
-  if (chatButton && chatPanel) {
-
-    chatButton.addEventListener("click", function () {
-
-      chatPanel.classList.toggle("active");
-
-      const isOpen =
-        chatPanel.classList.contains("active");
-
-      chatPanel.setAttribute(
-        "aria-hidden",
-        isOpen ? "false" : "true"
-      );
-
-      if (chatBadge) {
-        chatBadge.style.display = "none";
-      }
-
-    });
-
+  if (!btn || !panel) {
+    console.error("Chat ICT: button/panel tidak dijumpai");
+    return;
   }
 
+  console.log("Chat ICT FINAL aktif");
 
-  // BUTANG X
-  if (closeChat && chatPanel) {
+  // BUKA CHAT
+  btn.onclick = function (event) {
+    event.preventDefault();
+    event.stopPropagation();
 
-    closeChat.addEventListener("click", function () {
+    panel.classList.add("active");
+    panel.setAttribute("aria-hidden", "false");
 
-      chatPanel.classList.remove("active");
+    if (badge) {
+      badge.style.display = "none";
+    }
+  };
 
-      chatPanel.setAttribute(
-        "aria-hidden",
-        "true"
-      );
+  // TUTUP CHAT
+  if (closeBtn) {
+    closeBtn.onclick = function (event) {
+      event.preventDefault();
+      event.stopPropagation();
 
-    });
-
+      panel.classList.remove("active");
+      panel.setAttribute("aria-hidden", "true");
+    };
   }
 
-
-  // PILIHAN BANTUAN
-  document
-    .querySelectorAll(".chat-options button")
+  // PILIHAN CHAT
+  document.querySelectorAll(".chat-options button")
     .forEach(function (button) {
 
-      button.addEventListener("click", function () {
+      button.onclick = function () {
 
-        const type =
-          button.getAttribute("data-help");
-
+        const type = button.getAttribute("data-help");
         let answer = "";
-
 
         if (type === "password") {
 
           answer = `
-            🔑 <strong>Lupa Kata Laluan</strong>
-            <br><br>
-            Gunakan menu <strong>Semak ID</strong>
-            pada portal. Masukkan No. KP/MyKid murid
-            dan PIN penjaga untuk melihat maklumat
-            akaun DELIMa.
+            🔑 <strong>Lupa Kata Laluan</strong><br><br>
+            Gunakan menu <strong>Semak ID</strong>.
+            Masukkan No. KP/MyKid murid dan PIN penjaga
+            untuk melihat maklumat akaun DELIMa.
           `;
 
-        }
-
-
-        else if (type === "id") {
+        } else if (type === "id") {
 
           answer = `
-            👤 <strong>Masalah ID DELIMa</strong>
-            <br><br>
-            Pastikan No. KP/MyKid murid dimasukkan
-            dengan betul. Jika akaun masih tidak
-            ditemui, sila hubungi pihak ICT sekolah.
+            👤 <strong>Masalah ID DELIMa</strong><br><br>
+            Pastikan No. KP/MyKid murid dimasukkan dengan betul.
+            Jika akaun masih tidak ditemui, sila hubungi pihak ICT sekolah.
           `;
 
-        }
-
-
-        else if (type === "login") {
+        } else if (type === "login") {
 
           answer = `
-            🔐 <strong>Tidak Boleh Log Masuk</strong>
-            <br><br>
-            Pastikan ID DELIMa dan kata laluan
-            dimasukkan dengan tepat. Pastikan juga
-            tiada ruang kosong semasa menyalin.
+            🔐 <strong>Tidak Boleh Log Masuk</strong><br><br>
+            Pastikan ID DELIMa dan kata laluan dimasukkan dengan tepat.
+            Pastikan juga tiada ruang kosong semasa menyalin.
           `;
 
-        }
-
-
-        else if (type === "classroom") {
+        } else if (type === "classroom") {
 
           answer = `
-            📚 <strong>Google Classroom</strong>
-            <br><br>
-            Sila buka bahagian
-            <strong>Tutorial</strong> untuk melihat
-            panduan Google Classroom.
+            📚 <strong>Google Classroom</strong><br><br>
+            Sila buka bahagian <strong>Tutorial</strong>
+            untuk melihat panduan Google Classroom.
           `;
 
-        }
-
-
-        else {
+        } else {
 
           answer = `
-            🧑‍💻 <strong>Bantuan Lanjut</strong>
-            <br><br>
-            Sila buka bahagian
-            <strong>Bantuan ICT</strong> untuk
-            mendapatkan bantuan daripada pihak ICT
-            sekolah.
+            🧑‍💻 <strong>Bantuan Lanjut</strong><br><br>
+            Sila buka bahagian <strong>Bantuan ICT</strong>
+            untuk mendapatkan bantuan daripada pihak ICT sekolah.
           `;
-
         }
 
-
-        if (chatAnswer) {
-
-          chatAnswer.innerHTML = `
-            <div class="chat-answer-bubble">
-              ${answer}
-            </div>
-          `;
-
+        if (answerBox) {
+          answerBox.innerHTML =
+            `<div class="chat-answer-bubble">${answer}</div>`;
         }
-
-      });
-
+      };
     });
 
-
-  // TEKAN ESC UNTUK TUTUP
+  // ESC = TUTUP
   document.addEventListener("keydown", function (event) {
 
-    if (
-      event.key === "Escape" &&
-      chatPanel
-    ) {
-
-      chatPanel.classList.remove("active");
-
-      chatPanel.setAttribute(
-        "aria-hidden",
-        "true"
-      );
-
+    if (event.key === "Escape") {
+      panel.classList.remove("active");
+      panel.setAttribute("aria-hidden", "true");
     }
 
   });
 
 });
-
-// =========================================
-// PILIHAN CHAT
-// =========================================
-
-document
-  .querySelectorAll(".chat-options button")
-  .forEach(function (button) {
-
-    button.addEventListener("click", function () {
-
-      const type =
-        button.getAttribute("data-help");
-
-      let answer = "";
-
-
-      if (type === "password") {
-
-        answer = `
-          🔑 <strong>Lupa Kata Laluan</strong>
-          <br><br>
-          Gunakan menu <strong>Semak ID</strong>.
-          Masukkan No. KP/MyKid murid dan PIN penjaga
-          untuk melihat maklumat akaun DELIMa.
-        `;
-
-      }
-
-
-      else if (type === "id") {
-
-        answer = `
-          👤 <strong>Masalah ID DELIMa</strong>
-          <br><br>
-          Pastikan No. KP/MyKid murid dimasukkan
-          dengan betul. Jika akaun masih tidak
-          ditemui, sila hubungi pihak ICT sekolah.
-        `;
-
-      }
-
-
-      else if (type === "login") {
-
-        answer = `
-          🔐 <strong>Tidak Boleh Log Masuk</strong>
-          <br><br>
-          Pastikan ID DELIMa dan kata laluan
-          dimasukkan dengan tepat. Pastikan juga
-          tiada ruang kosong semasa menyalin.
-        `;
-
-      }
-
-
-      else if (type === "classroom") {
-
-        answer = `
-          📚 <strong>Google Classroom</strong>
-          <br><br>
-          Sila buka bahagian <strong>Tutorial</strong>
-          untuk melihat panduan Google Classroom.
-        `;
-
-      }
-
-
-      else {
-
-        answer = `
-          🧑‍💻 <strong>Bantuan Lanjut</strong>
-          <br><br>
-          Sila buka bahagian <strong>Bantuan ICT</strong>
-          untuk menghubungi pihak ICT sekolah.
-        `;
-
-      }
-
-
-      if (chatAnswer) {
-
-        chatAnswer.innerHTML =
-          `<div class="chat-answer-bubble">
-             ${answer}
-           </div>`;
-
-      }
-
-    });
-
-  });
