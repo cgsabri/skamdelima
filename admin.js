@@ -1342,6 +1342,283 @@ async function loadAdminChats() {
   }
 
 }
+
+// ======================================
+// LIVE CHAT - OPEN CONVERSATION
+// ======================================
+
+async function openAdminChat(chatId) {
+
+  if (!chatId) {
+    return;
+  }
+
+  activeAdminChatId =
+    String(chatId);
+
+
+  const empty =
+    document.getElementById(
+      "chatRoomEmpty"
+    );
+
+  const active =
+    document.getElementById(
+      "chatRoomActive"
+    );
+
+  const messagesBox =
+    document.getElementById(
+      "adminChatMessages"
+    );
+
+  const nameElement =
+    document.getElementById(
+      "activeChatName"
+    );
+
+  const metaElement =
+    document.getElementById(
+      "activeChatMeta"
+    );
+
+
+  // ======================================
+  // TUKAR PAPARAN
+  // ======================================
+
+  if (empty) {
+    empty.classList.add("hidden");
+  }
+
+  if (active) {
+    active.classList.remove("hidden");
+  }
+
+
+  // ======================================
+  // HEADER CHAT
+  // ======================================
+
+  if (nameElement) {
+    nameElement.textContent =
+      "Ibu Bapa / Penjaga";
+  }
+
+  if (metaElement) {
+    metaElement.textContent =
+      "Chat ID: " +
+      activeAdminChatId;
+  }
+
+
+  // ======================================
+  // LOADING
+  // ======================================
+
+  if (messagesBox) {
+
+    messagesBox.innerHTML =
+      '<div class="chat-empty">' +
+      'Sedang memuatkan mesej...' +
+      '</div>';
+
+  }
+
+
+  try {
+
+    const data =
+      await apiRequest(
+        "getAdminChatMessages",
+        {
+          chatId:
+            activeAdminChatId
+        }
+      );
+
+
+    if (!data.success) {
+
+      handleApiFailure(data);
+
+      if (messagesBox) {
+
+        messagesBox.innerHTML =
+          '<div class="chat-empty">' +
+          escapeHTML(
+            data.message ||
+            "Tidak dapat membaca mesej."
+          ) +
+          '</div>';
+
+      }
+
+      return;
+    }
+
+
+    const messages =
+      Array.isArray(data.messages)
+        ? data.messages
+        : [];
+
+
+    renderAdminChatMessages(
+      messages
+    );
+
+
+    // Refresh senarai supaya
+    // unread badge dikemas kini
+    loadAdminChats();
+
+
+  } catch (error) {
+
+    console.error(
+      "Open chat error:",
+      error
+    );
+
+
+    if (messagesBox) {
+
+      messagesBox.innerHTML =
+        '<div class="chat-empty">' +
+        'Ralat membaca mesej.' +
+        '</div>';
+
+    }
+
+  }
+
+}
+
+
+// ======================================
+// LIVE CHAT - RENDER MESSAGES
+// ======================================
+
+function renderAdminChatMessages(
+  messages
+) {
+
+  const box =
+    document.getElementById(
+      "adminChatMessages"
+    );
+
+
+  if (!box) {
+    return;
+  }
+
+
+  box.innerHTML = "";
+
+
+  if (!messages.length) {
+
+    box.innerHTML =
+      '<div class="chat-empty">' +
+      'Belum ada mesej.' +
+      '</div>';
+
+    return;
+  }
+
+
+  messages.forEach(
+    message => {
+
+      const sender =
+        String(
+          message.sender || ""
+        ).toUpperCase();
+
+
+      const isAdmin =
+        sender === "ADMIN";
+
+
+      const row =
+        document.createElement(
+          "div"
+        );
+
+
+      row.className =
+        "admin-message-row " +
+        (
+          isAdmin
+            ? "admin"
+            : "parent"
+        );
+
+
+      const bubble =
+        document.createElement(
+          "div"
+        );
+
+
+      bubble.className =
+        "admin-message-bubble";
+
+
+      const text =
+        document.createElement(
+          "p"
+        );
+
+
+      text.textContent =
+        message.message || "";
+
+
+      const info =
+        document.createElement(
+          "small"
+        );
+
+
+      info.textContent =
+        isAdmin
+          ? "Admin ICT"
+          : "Ibu Bapa";
+
+
+      bubble.appendChild(
+        text
+      );
+
+
+      bubble.appendChild(
+        info
+      );
+
+
+      row.appendChild(
+        bubble
+      );
+
+
+      box.appendChild(
+        row
+      );
+
+    }
+  );
+
+
+  // Scroll terus ke mesej terbaru
+
+  box.scrollTop =
+    box.scrollHeight;
+
+}
+
 // ======================================
 // API
 // ======================================
