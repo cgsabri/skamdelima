@@ -578,12 +578,103 @@
         ❓ <span>Masalah Lain</span>
       </button>
 
+      <button type="button" id="startLiveChatBtn">
+  💬 <span>Chat dengan Admin ICT</span>
+      </button>
+
     </div>
 
     <div id="chatAnswer"></div>
 
   </div>
+    <!-- LIVE CHAT PARENT -->
 
+<div id="liveChatArea" class="live-chat-area hidden">
+
+  <!-- LOGIN / PENGESAHAN -->
+
+  <div id="chatLogin">
+
+    <div class="chat-live-title">
+      💬 Chat dengan Admin ICT
+    </div>
+
+    <p class="chat-live-info">
+      Sila sahkan maklumat murid sebelum
+      memulakan perbualan.
+    </p>
+
+    <input
+      type="text"
+      id="chatNokp"
+      inputmode="numeric"
+      maxlength="12"
+      placeholder="No. KP / MyKid">
+
+    <input
+      type="password"
+      id="chatPin"
+      inputmode="numeric"
+      maxlength="4"
+      placeholder="4 digit PIN">
+
+    <button
+      type="button"
+      id="chatLoginBtn"
+      class="chat-primary-btn">
+      Mula Chat
+    </button>
+
+    <div id="chatLoginMessage"></div>
+
+  </div>
+
+
+  <!-- RUANG PERBUALAN -->
+
+  <div id="chatConversation" class="hidden">
+
+    <div class="live-chat-user">
+
+      <strong id="chatStudentName">
+        Murid
+      </strong>
+
+      <span id="chatStudentClass"></span>
+
+      <small>
+        🟢 Chat Bantuan ICT
+      </small>
+
+    </div>
+
+
+    <div
+      id="liveMessages"
+      class="live-messages">
+    </div>
+
+
+    <div class="live-chat-compose">
+
+      <textarea
+        id="liveMessageInput"
+        maxlength="1000"
+        rows="2"
+        placeholder="Taip mesej..."></textarea>
+
+      <button
+        type="button"
+        id="sendLiveMessageBtn"
+        aria-label="Hantar mesej">
+        ➤
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
   <div class="chat-footer">
     Bantuan ICT • SK Agama (MIS) Miri
   </div>
