@@ -582,8 +582,12 @@
                 <textarea id="adminChatInput" rows="2" maxlength="1000"
                           placeholder="Taip balasan kepada ibu bapa..."
                           onkeydown="adminChatKeydown(event)"></textarea>
-                <button id="adminChatSendBtn" class="primary-small"
-                        type="submit">Hantar</button>
+                <button
+  id="adminChatSendBtn"
+  type="button"
+  onclick="sendAdminChat()">
+  Hantar
+</button>
               </form>
             </div>
           </section>
