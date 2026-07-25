@@ -144,11 +144,10 @@ function showDashboard() {
 
 function showAdminSection(section) {
 
-  cconst sections = [
+  const sections = [
   "students",
   "tutorial",
-  "help",
-  "chat"
+  "help"
 ];
 
 
@@ -206,9 +205,7 @@ function showAdminSection(section) {
     loadHelp();
   }
 
-  if (section === "chat") {
-  loadAdminChats();
-  }
+  
 }
 
 
