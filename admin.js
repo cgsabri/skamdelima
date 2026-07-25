@@ -1378,6 +1378,20 @@ async function openAdminChat(chatId) {
   activeAdminChatId =
     String(chatId);
 
+  // Cari maklumat murid untuk chat yang dipilih
+const selectedChat =
+  adminChatConversations.find(
+    chat =>
+      String(chat.chatId) ===
+      String(chatId)
+  ) || {};
+
+const studentName =
+  selectedChat.nama ||
+  "Ibu Bapa / Penjaga";
+
+const studentClass =
+  selectedChat.kelas || "";
 
   const empty =
     document.getElementById(
@@ -1423,15 +1437,29 @@ async function openAdminChat(chatId) {
   // ======================================
 
   if (nameElement) {
-    nameElement.textContent =
+
+  nameElement.textContent =
+    studentName;
+
+}
+
+
+if (metaElement) {
+
+  if (studentClass) {
+
+    metaElement.textContent =
+      studentClass +
+      " • Ibu Bapa / Penjaga";
+
+  } else {
+
+    metaElement.textContent =
       "Ibu Bapa / Penjaga";
+
   }
 
-  if (metaElement) {
-    metaElement.textContent =
-      "Chat ID: " +
-      activeAdminChatId;
-  }
+}
 
 
   // ======================================
