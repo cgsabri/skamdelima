@@ -1289,12 +1289,15 @@ async function loadAdminChats() {
         "admin-chat-item";
 
       const student =
-        chat.studentId ||
-        "Ibu Bapa";
+  chat.nama ||
+  "Ibu Bapa / Penjaga";
 
-      const message =
-        chat.lastMessage ||
-        "Mesej baharu";
+const kelas =
+  chat.kelas || "";
+
+const message =
+  chat.lastMessage ||
+  "Mesej baharu";
 
       const unread =
         Number(
@@ -1302,23 +1305,34 @@ async function loadAdminChats() {
         );
 
       button.innerHTML =
-        "<strong>" +
-        escapeHTML(student) +
-        "</strong>" +
+  "<strong>" +
+  "👤 " +
+  escapeHTML(student) +
+  "</strong>" +
 
-        "<p>" +
-        escapeHTML(message) +
-        "</p>" +
+  (
+    kelas
+      ?
+      '<small class="chat-student-class">' +
+      escapeHTML(kelas) +
+      "</small>"
+      :
+      ""
+  ) +
 
-        (
-          unread > 0
-            ?
-            '<span class="chat-item-unread">' +
-            unread +
-            "</span>"
-            :
-            ""
-        );
+  "<p>" +
+  escapeHTML(message) +
+  "</p>" +
+
+  (
+    unread > 0
+      ?
+      '<span class="chat-item-unread">' +
+      unread +
+      "</span>"
+      :
+      ""
+  );
 
       button.onclick =
         function() {
