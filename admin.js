@@ -1,171 +1,72 @@
-// ======================================================
-// PORTAL PENGURUSAN DELIMA
-// ADMIN DASHBOARD
-// SK AGAMA (MIS) MIRI
-// ======================================================
-
-
-// ======================================================
+// ======================================
 // CONFIG
-// ======================================================
-
-// PENTING:
-// Kekalkan URL Google Apps Script cikgu yang sedia ada.
-// Jika admin.js lama cikgu sudah mempunyai API_URL,
-// gantikan URL di bawah dengan URL tersebut.
+// ======================================
 
 const API_URL =
   "https://script.google.com/macros/s/AKfycbzWvfXVDh6y2ttNc3ySkVcymqEfgmsI7K-wwGY4ve_m_y78HfVIi55k7kyzllgGVnB4/exec";
 
-
-// ======================================================
-// GLOBAL VARIABLES
-// ======================================================
-
-let sessionToken =
-  sessionStorage.getItem("adminSession") || "";
-
+let sessionToken = "";
 let allStudents = [];
 let allTutorials = [];
 
-
-// ======================================================
-// LIVE CHAT VARIABLES
-// ======================================================
+// ======================================
+// LIVE CHAT STATE
+// ======================================
 
 let adminChatConversations = [];
-
 let activeAdminChatId = "";
-
 let adminChatTimer = null;
 
 
-// ======================================================
-// PAGE LOAD
-// ======================================================
+// ======================================
+// LOGIN
+// ======================================
 
-document.addEventListener(
-  "DOMContentLoaded",
-  function () {
+async function loginAdmin() {
 
-    console.log(
-      "Portal DELIMa Admin loaded"
-    );
+  const username =
+    document
+      .getElementById("username")
+      .value
+      .trim();
 
-    setupAdmin();
+  const password =
+    document
+      .getElementById("password")
+      .value
+      .trim();
 
-  }
-);
-
-
-// ======================================================
-// SETUP ADMIN
-// ======================================================
-
-function setupAdmin() {
-
-  const loginSection =
+  const btn =
     document.getElementById(
-      "adminLogin"
+      "loginBtn"
     );
 
-  const dashboard =
-    document.getElementById(
-      "adminDashboard"
-    );
-
-
-  if (sessionToken) {
-
-    if (loginSection) {
-      loginSection.classList.add(
-        "hidden"
-      );
-    }
-
-    if (dashboard) {
-      dashboard.classList.remove(
-        "hidden"
-      );
-    }
-
-    showAdminSection(
-      "students"
-    );
-
-  }
-
-}
-
-
-// ======================================================
-// ADMIN LOGIN
-// ======================================================
-
-async function loginAdmin(event) {
-
-  if (event) {
-    event.preventDefault();
-  }
-
-
-  const usernameInput =
-    document.getElementById(
-      "adminUsername"
-    );
-
-  const passwordInput =
-    document.getElementById(
-      "adminPassword"
-    );
-
-  const messageBox =
+  const message =
     document.getElementById(
       "loginMessage"
     );
 
 
-  if (
-    !usernameInput ||
-    !passwordInput
-  ) {
+  if (!username || !password) {
+
+    message.innerHTML =
+      '<div class="error">' +
+      'Sila masukkan username dan password.' +
+      '</div>';
 
     return;
 
   }
 
 
-  const username =
-    usernameInput.value.trim();
+  btn.disabled = true;
+  btn.textContent =
+    "Sedang log masuk...";
 
-  const password =
-    passwordInput.value.trim();
-
-
-  if (
-    !username ||
-    !password
-  ) {
-
-    showMessage(
-      messageBox,
-      "Sila masukkan ID Admin dan kata laluan.",
-      "error"
-    );
-
-    return;
-
-  }
+  message.innerHTML = "";
 
 
   try {
-
-    showMessage(
-      messageBox,
-      "Sedang log masuk...",
-      "info"
-    );
-
 
     const data =
       await apiRequest(
@@ -179,12 +80,13 @@ async function loginAdmin(event) {
 
     if (!data.success) {
 
-      showMessage(
-        messageBox,
-        data.message ||
-        "ID Admin atau kata laluan tidak sah.",
-        "error"
-      );
+      message.innerHTML =
+        '<div class="error">' +
+        escapeHTML(
+          data.message ||
+          "Login gagal."
+        ) +
+        '</div>';
 
       return;
 
@@ -192,118 +94,89 @@ async function loginAdmin(event) {
 
 
     sessionToken =
-      data.token ||
-      data.sessionToken ||
-      "";
+      data.token || "";
 
 
-    if (!sessionToken) {
-
-      showMessage(
-        messageBox,
-        "Token sesi tidak diterima.",
-        "error"
-      );
-
-      return;
-
-    }
-
-
-    sessionStorage.setItem(
-      "adminSession",
+    localStorage.setItem(
+      "delimaAdminToken",
       sessionToken
     );
 
 
-    const loginSection =
-      document.getElementById(
-        "adminLogin"
-      );
-
-    const dashboard =
-      document.getElementById(
-        "adminDashboard"
-      );
+    showDashboard();
 
 
-    if (loginSection) {
-
-      loginSection.classList.add(
-        "hidden"
-      );
-
-    }
-
-
-    if (dashboard) {
-
-      dashboard.classList.remove(
-        "hidden"
-      );
-
-    }
-
-
-    showAdminSection(
-      "students"
-    );
-
-
-  }
-  catch (error) {
+  } catch (error) {
 
     console.error(
-      "Login error:",
+      "Login:",
       error
     );
 
 
-    showMessage(
-      messageBox,
-      "Tidak dapat menghubungi server.",
-      "error"
-    );
+    message.innerHTML =
+      '<div class="error">' +
+      'Tidak dapat menghubungi server.' +
+      '</div>';
+
+
+  } finally {
+
+    btn.disabled = false;
+    btn.textContent = "Log Masuk";
 
   }
 
 }
 
 
-// ======================================================
-// LOGOUT
-// ======================================================
+// ======================================
+// SHOW DASHBOARD
+// ======================================
 
-function logoutAdmin() {
+function showDashboard() {
 
-  stopAdminChatPolling();
+  const loginPage =
+    document.getElementById(
+      "loginPage"
+    );
+
+  const dashboardPage =
+    document.getElementById(
+      "dashboardPage"
+    );
 
 
-  activeAdminChatId = "";
+  if (loginPage) {
 
-  adminChatConversations = [];
+    loginPage.classList.add(
+      "hidden"
+    );
+
+  }
 
 
-  sessionToken = "";
+  if (dashboardPage) {
+
+    dashboardPage.classList.remove(
+      "hidden"
+    );
+
+  }
 
 
-  sessionStorage.removeItem(
-    "adminSession"
+  showAdminSection(
+    "students"
   );
-
-
-  location.reload();
 
 }
 
 
-// ======================================================
-// SHOW ADMIN SECTION
-// ======================================================
+// ======================================
+// ADMIN NAVIGATION
+// ======================================
 
-function showAdminSection(
-  section
-) {
+function showAdminSection(section) {
 
   const sections = [
     "students",
@@ -313,41 +186,40 @@ function showAdminSection(
   ];
 
 
-  sections.forEach(
-    function (name) {
+  sections.forEach(name => {
 
-      const element =
-        document.getElementById(
-          name + "Section"
-        );
-
-
-      if (element) {
-
-        element.classList.add(
-          "hidden"
-        );
-
-      }
+    const sectionElement =
+      document.getElementById(
+        name + "Section"
+      );
 
 
-      const tab =
-        document.getElementById(
-          "tab" +
-          capitalize(name)
-        );
+    if (sectionElement) {
 
-
-      if (tab) {
-
-        tab.classList.remove(
-          "active"
-        );
-
-      }
+      sectionElement
+        .classList
+        .add("hidden");
 
     }
-  );
+
+
+    const tabElement =
+      document.getElementById(
+        "tab" +
+        name.charAt(0).toUpperCase() +
+        name.slice(1)
+      );
+
+
+    if (tabElement) {
+
+      tabElement
+        .classList
+        .remove("active");
+
+    }
+
+  });
 
 
   const activeSection =
@@ -358,9 +230,9 @@ function showAdminSection(
 
   if (activeSection) {
 
-    activeSection.classList.remove(
-      "hidden"
-    );
+    activeSection
+      .classList
+      .remove("hidden");
 
   }
 
@@ -368,100 +240,58 @@ function showAdminSection(
   const activeTab =
     document.getElementById(
       "tab" +
-      capitalize(section)
+      section.charAt(0).toUpperCase() +
+      section.slice(1)
     );
 
 
   if (activeTab) {
 
-    activeTab.classList.add(
-      "active"
-    );
+    activeTab
+      .classList
+      .add("active");
 
   }
 
 
-  // ----------------------------------
-  // STUDENTS
-  // ----------------------------------
+  // MURID
 
-  if (
-    section ===
-    "students"
-  ) {
+  if (section === "students") {
 
     stopAdminChatPolling();
 
-    if (
-      typeof loadStudents ===
-      "function"
-    ) {
-
-      loadStudents();
-
-    }
+    loadDashboard();
 
   }
 
 
-  // ----------------------------------
   // TUTORIAL
-  // ----------------------------------
 
-  if (
-    section ===
-    "tutorial"
-  ) {
+  if (section === "tutorial") {
 
     stopAdminChatPolling();
 
-    if (
-      typeof loadTutorials ===
-      "function"
-    ) {
-
-      loadTutorials();
-
-    }
+    loadTutorials();
 
   }
 
 
-  // ----------------------------------
-  // HELP
-  // ----------------------------------
+  // BANTUAN ICT
 
-  if (
-    section ===
-    "help"
-  ) {
+  if (section === "help") {
 
     stopAdminChatPolling();
 
-    if (
-      typeof loadHelp ===
-      "function"
-    ) {
-
-      loadHelp();
-
-    }
+    loadHelp();
 
   }
 
 
-  // ----------------------------------
   // LIVE CHAT
-  // ----------------------------------
 
-  if (
-    section ===
-    "chat"
-  ) {
+  if (section === "chat") {
 
-    loadAdminChats(
-      true
-    );
+    loadAdminChats(true);
 
     startAdminChatPolling();
 
@@ -470,23 +300,595 @@ function showAdminSection(
 }
 
 
-// ======================================================
-// CAPITALIZE
-// ======================================================
+// ======================================
+// LOAD DASHBOARD
+// ======================================
 
-function capitalize(
-  text
-) {
+async function loadDashboard() {
 
-  if (!text) {
-    return "";
+  try {
+
+    const data =
+      await apiRequest(
+        "getDashboard"
+      );
+
+
+    if (!data.success) {
+
+      handleApiFailure(data);
+
+      return;
+
+    }
+
+
+    updateDashboardStats(
+      data
+    );
+
+
+    if (
+      Array.isArray(
+        data.students
+      )
+    ) {
+
+      allStudents =
+        data.students;
+
+      renderStudents(
+        allStudents
+      );
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      "Dashboard:",
+      error
+    );
+
+  }
+
+}
+
+
+// ======================================
+// UPDATE DASHBOARD STATS
+// ======================================
+
+function updateDashboardStats(data) {
+
+  const total =
+    document.getElementById(
+      "totalStudents"
+    );
+
+  const active =
+    document.getElementById(
+      "activeStudents"
+    );
+
+  const classes =
+    document.getElementById(
+      "totalClasses"
+    );
+
+
+  if (total) {
+
+    total.textContent =
+      data.totalStudents ??
+      data.total ??
+      0;
+
   }
 
 
-  return (
-    text.charAt(0).toUpperCase() +
-    text.slice(1)
+  if (active) {
+
+    active.textContent =
+      data.activeStudents ??
+      data.active ??
+      0;
+
+  }
+
+
+  if (classes) {
+
+    classes.textContent =
+      data.totalClasses ??
+      data.classes ??
+      0;
+
+  }
+
+}
+
+
+// ======================================
+// LOAD STUDENTS
+// ======================================
+
+async function loadStudents() {
+
+  try {
+
+    const data =
+      await apiRequest(
+        "getStudents"
+      );
+
+
+    if (!data.success) {
+
+      handleApiFailure(data);
+
+      return;
+
+    }
+
+
+    allStudents =
+      Array.isArray(
+        data.students
+      )
+        ? data.students
+        : [];
+
+
+    renderStudents(
+      allStudents
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Students:",
+      error
+    );
+
+  }
+
+}
+
+
+// ======================================
+// RENDER STUDENTS
+// ======================================
+
+function renderStudents(students) {
+
+  const table =
+    document.getElementById(
+      "studentTable"
+    );
+
+
+  if (!table) {
+
+    return;
+
+  }
+
+
+  table.innerHTML = "";
+
+
+  if (!students.length) {
+
+    table.innerHTML =
+      '<tr>' +
+      '<td colspan="7">' +
+      'Tiada rekod murid.' +
+      '</td>' +
+      '</tr>';
+
+    return;
+
+  }
+
+
+  students.forEach(
+    student => {
+
+      const row =
+        document.createElement(
+          "tr"
+        );
+
+
+      const nama =
+        student.nama ||
+        student.NAMA ||
+        "";
+
+
+      const nokp =
+        student.nokp ||
+        student.NO_KP ||
+        student.ic ||
+        "";
+
+
+      const kelas =
+        student.kelas ||
+        student.KELAS ||
+        "";
+
+
+      const delima =
+        student.delima ||
+        student.ID_DELIMA ||
+        student.email ||
+        "";
+
+
+      const password =
+        student.password ||
+        student.PASSWORD ||
+        student.katalaluan ||
+        "";
+
+
+      const pin =
+        student.pin ||
+        student.PIN ||
+        "";
+
+
+      row.innerHTML =
+
+        "<td>" +
+        escapeHTML(nama) +
+        "</td>" +
+
+        "<td>" +
+        escapeHTML(nokp) +
+        "</td>" +
+
+        "<td>" +
+        escapeHTML(kelas) +
+        "</td>" +
+
+        "<td>" +
+        escapeHTML(delima) +
+        "</td>" +
+
+        "<td>" +
+        escapeHTML(password) +
+        "</td>" +
+
+        "<td>" +
+        escapeHTML(pin) +
+        "</td>";
+
+
+      table.appendChild(
+        row
+      );
+
+    }
   );
+
+}
+
+
+// ======================================
+// SEARCH STUDENT
+// ======================================
+
+function searchStudent() {
+
+  const searchInput =
+    document.getElementById(
+      "studentSearch"
+    );
+
+
+  if (!searchInput) {
+
+    return;
+
+  }
+
+
+  const keyword =
+    searchInput
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  if (!keyword) {
+
+    renderStudents(
+      allStudents
+    );
+
+    return;
+
+  }
+
+
+  const filtered =
+    allStudents.filter(
+      student => {
+
+        return (
+          JSON.stringify(student)
+            .toLowerCase()
+            .includes(keyword)
+        );
+
+      }
+    );
+
+
+  renderStudents(
+    filtered
+  );
+
+}
+
+
+// ======================================
+// FILTER CLASS
+// ======================================
+
+function filterClass() {
+
+  const filter =
+    document.getElementById(
+      "classFilter"
+    );
+
+
+  if (!filter) {
+
+    return;
+
+  }
+
+
+  const selectedClass =
+    filter.value
+      .trim()
+      .toLowerCase();
+
+
+  if (!selectedClass) {
+
+    renderStudents(
+      allStudents
+    );
+
+    return;
+
+  }
+
+
+  const filtered =
+    allStudents.filter(
+      student => {
+
+        const kelas =
+          String(
+            student.kelas ||
+            student.KELAS ||
+            ""
+          ).toLowerCase();
+
+
+        return (
+          kelas ===
+          selectedClass
+        );
+
+      }
+    );
+
+
+  renderStudents(
+    filtered
+  );
+
+}
+
+
+// ======================================
+// TUTORIAL
+// ======================================
+
+async function loadTutorials() {
+
+  try {
+
+    const data =
+      await apiRequest(
+        "getTutorials"
+      );
+
+
+    if (!data.success) {
+
+      handleApiFailure(data);
+
+      return;
+
+    }
+
+
+    allTutorials =
+      Array.isArray(
+        data.tutorials
+      )
+        ? data.tutorials
+        : [];
+
+
+    renderTutorials(
+      allTutorials
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Tutorial:",
+      error
+    );
+
+  }
+
+}
+
+
+// ======================================
+// RENDER TUTORIAL
+// ======================================
+
+function renderTutorials(tutorials) {
+
+  const container =
+    document.getElementById(
+      "tutorialList"
+    );
+
+
+  if (!container) {
+
+    return;
+
+  }
+
+
+  container.innerHTML = "";
+
+
+  if (!tutorials.length) {
+
+    container.innerHTML =
+      '<div class="empty-state">' +
+      'Tiada tutorial.' +
+      '</div>';
+
+    return;
+
+  }
+
+
+  tutorials.forEach(
+    tutorial => {
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+
+      item.className =
+        "admin-list-item";
+
+
+      const title =
+        tutorial.title ||
+        tutorial.tajuk ||
+        "";
+
+
+      const description =
+        tutorial.description ||
+        tutorial.penerangan ||
+        "";
+
+
+      item.innerHTML =
+
+        "<strong>" +
+        escapeHTML(title) +
+        "</strong>" +
+
+        "<p>" +
+        escapeHTML(description) +
+        "</p>";
+
+
+      container.appendChild(
+        item
+      );
+
+    }
+  );
+
+}
+
+
+// ======================================
+// HELP
+// ======================================
+
+async function loadHelp() {
+
+  try {
+
+    const data =
+      await apiRequest(
+        "getHelp"
+      );
+
+
+    if (!data.success) {
+
+      handleApiFailure(data);
+
+      return;
+
+    }
+
+
+    const container =
+      document.getElementById(
+        "helpAdminContent"
+      );
+
+
+    if (!container) {
+
+      return;
+
+    }
+
+
+    if (data.help) {
+
+      container.innerHTML =
+        "<pre>" +
+        escapeHTML(
+          JSON.stringify(
+            data.help,
+            null,
+            2
+          )
+        ) +
+        "</pre>";
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      "Help:",
+      error
+    );
+
+  }
 
 }
 
@@ -496,9 +898,9 @@ function capitalize(
 // ======================================================
 
 
-// ======================================================
-// LOAD CHAT LIST
-// ======================================================
+// ======================================
+// LOAD SENARAI CHAT
+// ======================================
 
 async function loadAdminChats(
   showError = false
@@ -529,7 +931,7 @@ async function loadAdminChats(
 
         showAdminChatError(
           data.message ||
-          "Tidak dapat memuatkan chat."
+          "Tidak dapat memuatkan Live Chat."
         );
 
       }
@@ -540,54 +942,30 @@ async function loadAdminChats(
     }
 
 
-    // Backend mungkin return chats
-    // atau conversations.
-
     adminChatConversations =
       Array.isArray(
         data.chats
       )
         ? data.chats
-        :
-      Array.isArray(
-        data.conversations
-      )
-        ? data.conversations
-        :
-        [];
+        : [];
 
 
     renderAdminChatList();
 
-
-    updateAdminChatBadge(
-      data
-    );
+    updateAdminChatBadge();
 
 
-    // Jika admin sedang membuka chat,
-    // refresh mesej chat tersebut.
-
-    if (
-      activeAdminChatId
-    ) {
+    if (activeAdminChatId) {
 
       const exists =
         adminChatConversations.some(
-          function (item) {
-
-            return (
-              String(
-                getChatId(
-                  item
-                )
-              ) ===
-              String(
-                activeAdminChatId
-              )
-            );
-
-          }
+          chat =>
+            String(
+              chat.chatId || ""
+            ) ===
+            String(
+              activeAdminChatId
+            )
         );
 
 
@@ -602,11 +980,11 @@ async function loadAdminChats(
 
     }
 
-  }
-  catch (error) {
+
+  } catch (error) {
 
     console.error(
-      "Admin chat list:",
+      "Live Chat:",
       error
     );
 
@@ -614,7 +992,7 @@ async function loadAdminChats(
     if (showError) {
 
       showAdminChatError(
-        "Live Chat tidak dapat dimuatkan."
+        "Tidak dapat menghubungi sistem Live Chat."
       );
 
     }
@@ -637,9 +1015,9 @@ async function loadAdminChats(
 }
 
 
-// ======================================================
-// RENDER CHAT LIST
-// ======================================================
+// ======================================
+// RENDER SENARAI CHAT
+// ======================================
 
 function renderAdminChatList() {
 
@@ -655,10 +1033,7 @@ function renderAdminChatList() {
     );
 
 
-  if (
-    !list ||
-    !count
-  ) {
+  if (!list || !count) {
 
     return;
 
@@ -681,18 +1056,17 @@ function renderAdminChatList() {
       'Belum ada mesej daripada ibu bapa.' +
       '</div>';
 
-
     return;
 
   }
 
 
   adminChatConversations.forEach(
-    function (chat) {
+    chat => {
 
       const chatId =
-        getChatId(
-          chat
+        String(
+          chat.chatId || ""
         );
 
 
@@ -705,55 +1079,29 @@ function renderAdminChatList() {
 
       const unread =
         Number(
-
-          chat.unread ??
-
-          chat.unreadAdmin ??
-
-          chat.unread_count ??
-
-          (
-            String(
-              chat.readAdmin ||
-              chat.READ_ADMIN ||
-              ""
-            ).toUpperCase() ===
-            "NO"
-              ? 1
-              : 0
-          )
-
-        ) || 0;
+          chat.unread || 0
+        );
 
 
       const status =
         String(
           chat.status ||
-          chat.STATUS ||
           "OPEN"
         ).toUpperCase();
 
 
-      const name =
-        chat.parentName ||
-        chat.nama ||
-        chat.studentName ||
+      const studentId =
         chat.studentId ||
-        chat.STUDENT_ID ||
         "Ibu Bapa";
 
 
-      const preview =
+      const lastMessage =
         chat.lastMessage ||
-        chat.message ||
-        chat.MESSAGE ||
-        "Perbualan bantuan ICT";
+        "Perbualan Bantuan ICT";
 
 
-      const time =
-        chat.lastTimestamp ||
+      const timestamp =
         chat.timestamp ||
-        chat.TIMESTAMP ||
         "";
 
 
@@ -769,11 +1117,8 @@ function renderAdminChatList() {
 
       button.className =
         "admin-chat-item" +
-
         (
-          String(
-            chatId
-          ) ===
+          chatId ===
           String(
             activeAdminChatId
           )
@@ -788,27 +1133,25 @@ function renderAdminChatList() {
 
           '<strong>' +
           escapeHTML(
-            name
+            studentId
           ) +
           '</strong>' +
 
           '<time>' +
           escapeHTML(
             formatChatTime(
-              time
+              timestamp
             )
           ) +
           '</time>' +
 
         '</div>' +
 
-
         '<p>' +
         escapeHTML(
-          preview
+          lastMessage
         ) +
         '</p>' +
-
 
         '<div class="admin-chat-item-bottom">' +
 
@@ -832,7 +1175,6 @@ function renderAdminChatList() {
 
           '</span>' +
 
-
           (
             unread > 0
 
@@ -846,14 +1188,14 @@ function renderAdminChatList() {
 
               :
 
-              ''
+              ""
           ) +
 
         '</div>';
 
 
       button.onclick =
-        function () {
+        () => {
 
           openAdminChat(
             chatId
@@ -870,47 +1212,15 @@ function renderAdminChatList() {
   );
 
 }
-
-
-// ======================================================
-// GET CHAT ID
-// ======================================================
-
-function getChatId(
-  chat
-) {
-
-  return (
-
-    chat.chatId ||
-
-    chat.chat_id ||
-
-    chat.CHAT_ID ||
-
-    chat.sessionId ||
-
-    chat.SESSION_ID ||
-
-    ""
-
-  );
-
-}
-
-
-// ======================================================
+// ======================================
 // OPEN CHAT
-// ======================================================
+// ======================================
 
-async function openAdminChat(
-  chatId
-) {
+async function openAdminChat(chatId) {
 
   activeAdminChatId =
     String(
-      chatId ||
-      ""
+      chatId || ""
     );
 
 
@@ -949,53 +1259,17 @@ async function openAdminChat(
 
   const chat =
     adminChatConversations.find(
-      function (item) {
-
-        return (
-          String(
-            getChatId(
-              item
-            )
-          ) ===
-          activeAdminChatId
-        );
-
-      }
+      item =>
+        String(
+          item.chatId || ""
+        ) ===
+        activeAdminChatId
     ) || {};
 
 
   const name =
-    chat.parentName ||
-    chat.nama ||
-    chat.studentName ||
     chat.studentId ||
-    chat.STUDENT_ID ||
     "Ibu Bapa";
-
-
-  const meta = [];
-
-
-  if (
-    chat.studentId ||
-    chat.STUDENT_ID
-  ) {
-
-    meta.push(
-      "ID Murid: " +
-      (
-        chat.studentId ||
-        chat.STUDENT_ID
-      )
-    );
-
-  }
-
-
-  meta.push(
-    "Chat: " +
-    activeAdminChatId
-  );
 
 
   const nameElement =
@@ -1021,11 +1295,13 @@ async function openAdminChat(
   if (metaElement) {
 
     metaElement.textContent =
-      meta.join(
-        " • "
-      );
+      "Chat ID: " +
+      activeAdminChatId;
 
   }
+
+
+  clearAdminChatError();
 
 
   await loadAdminChatMessages(
@@ -1033,16 +1309,22 @@ async function openAdminChat(
     true
   );
 
+
+  // Refresh senarai selepas mesej dibaca
+  await loadAdminChats(
+    false
+  );
+
 }
 
 
-// ======================================================
+// ======================================
 // LOAD CHAT MESSAGES
-// ======================================================
+// ======================================
 
 async function loadAdminChatMessages(
   chatId,
-  scrollToBottom = false
+  forceScroll = false
 ) {
 
   if (!chatId) {
@@ -1058,7 +1340,7 @@ async function loadAdminChatMessages(
       await apiRequest(
         "getAdminChatMessages",
         {
-          chatId
+          chatId: chatId
         }
       );
 
@@ -1081,13 +1363,11 @@ async function loadAdminChatMessages(
     }
 
 
+    // Pastikan response masih untuk
+    // chat yang sedang dibuka
     if (
-      String(
-        chatId
-      ) !==
-      String(
-        activeAdminChatId
-      )
+      String(chatId) !==
+      String(activeAdminChatId)
     ) {
 
       return;
@@ -1105,14 +1385,14 @@ async function loadAdminChatMessages(
 
     renderAdminChatMessages(
       messages,
-      scrollToBottom
+      forceScroll
     );
 
-  }
-  catch (error) {
+
+  } catch (error) {
 
     console.error(
-      "Admin chat messages:",
+      "Chat messages:",
       error
     );
 
@@ -1126,9 +1406,9 @@ async function loadAdminChatMessages(
 }
 
 
-// ======================================================
-// RENDER MESSAGES
-// ======================================================
+// ======================================
+// RENDER CHAT MESSAGES
+// ======================================
 
 function renderAdminChatMessages(
   messages,
@@ -1154,7 +1434,7 @@ function renderAdminChatMessages(
     box.scrollTop -
     box.clientHeight
 
-    < 100;
+    < 120;
 
 
   box.innerHTML = "";
@@ -1163,13 +1443,9 @@ function renderAdminChatMessages(
   if (!messages.length) {
 
     box.innerHTML =
-
       '<div class="chat-empty">' +
-
-      'Belum ada mesej dalam perbualan ini.' +
-
+      'Belum ada mesej.' +
       '</div>';
-
 
     return;
 
@@ -1177,43 +1453,16 @@ function renderAdminChatMessages(
 
 
   messages.forEach(
-    function (message) {
+    message => {
 
       const sender =
         String(
-          message.sender ||
-          message.SENDER ||
-          ""
+          message.sender || ""
         ).toUpperCase();
 
 
       const isAdmin =
-
-        sender ===
-        "ADMIN" ||
-
-        sender ===
-        "ICT";
-
-
-      const text =
-
-        message.message ||
-
-        message.MESSAGE ||
-
-        message.text ||
-
-        "";
-
-
-      const timestamp =
-
-        message.timestamp ||
-
-        message.TIMESTAMP ||
-
-        "";
+        sender === "ADMIN";
 
 
       const row =
@@ -1223,9 +1472,7 @@ function renderAdminChatMessages(
 
 
       row.className =
-
         "admin-message-row " +
-
         (
           isAdmin
             ? "admin"
@@ -1239,13 +1486,13 @@ function renderAdminChatMessages(
 
           '<p>' +
           escapeHTML(
-            text
+            message.message || ""
           ) +
           '</p>' +
 
           '<small>' +
 
-            escapeHTML(
+            (
               isAdmin
                 ? "Admin ICT"
                 : "Ibu Bapa"
@@ -1255,7 +1502,7 @@ function renderAdminChatMessages(
 
             escapeHTML(
               formatChatTime(
-                timestamp
+                message.timestamp
               )
             ) +
 
@@ -1285,13 +1532,11 @@ function renderAdminChatMessages(
 }
 
 
-// ======================================================
-// SEND ADMIN REPLY
-// ======================================================
+// ======================================
+// SEND ADMIN MESSAGE
+// ======================================
 
-async function sendAdminChat(
-  event
-) {
+async function sendAdminChat(event) {
 
   if (event) {
 
@@ -1312,10 +1557,7 @@ async function sendAdminChat(
     );
 
 
-  if (
-    !input ||
-    !button
-  ) {
+  if (!input || !button) {
 
     return;
 
@@ -1326,10 +1568,18 @@ async function sendAdminChat(
     input.value.trim();
 
 
-  if (
-    !activeAdminChatId ||
-    !message
-  ) {
+  if (!activeAdminChatId) {
+
+    showAdminChatError(
+      "Sila pilih perbualan terlebih dahulu."
+    );
+
+    return;
+
+  }
+
+
+  if (!message) {
 
     return;
 
@@ -1353,7 +1603,8 @@ async function sendAdminChat(
           chatId:
             activeAdminChatId,
 
-          message
+          message:
+            message
         }
       );
 
@@ -1392,11 +1643,11 @@ async function sendAdminChat(
       false
     );
 
-  }
-  catch (error) {
+
+  } catch (error) {
 
     console.error(
-      "Admin send chat:",
+      "Send chat:",
       error
     );
 
@@ -1405,8 +1656,8 @@ async function sendAdminChat(
       "Mesej tidak dapat dihantar."
     );
 
-  }
-  finally {
+
+  } finally {
 
     button.disabled =
       false;
@@ -1423,9 +1674,33 @@ async function sendAdminChat(
 }
 
 
-// ======================================================
-// CLOSE CHAT
-// ======================================================
+// ======================================
+// ENTER = SEND
+// SHIFT + ENTER = NEW LINE
+// ======================================
+
+function adminChatKeydown(event) {
+
+  if (
+    event.key === "Enter" &&
+    !event.shiftKey
+  ) {
+
+    event.preventDefault();
+
+
+    sendAdminChat(
+      event
+    );
+
+  }
+
+}
+
+
+// ======================================
+// CLOSE CONVERSATION
+// ======================================
 
 async function closeAdminConversation() {
 
@@ -1436,13 +1711,13 @@ async function closeAdminConversation() {
   }
 
 
-  const confirmClose =
+  const confirmed =
     confirm(
       "Tutup perbualan ini?"
     );
 
 
-  if (!confirmClose) {
+  if (!confirmed) {
 
     return;
 
@@ -1479,7 +1754,8 @@ async function closeAdminConversation() {
     }
 
 
-    activeAdminChatId = "";
+    activeAdminChatId =
+      "";
 
 
     const active =
@@ -1516,8 +1792,8 @@ async function closeAdminConversation() {
       false
     );
 
-  }
-  catch (error) {
+
+  } catch (error) {
 
     console.error(
       "Close chat:",
@@ -1534,26 +1810,62 @@ async function closeAdminConversation() {
 }
 
 
-// ======================================================
-// ENTER = SEND
-// SHIFT + ENTER = NEW LINE
-// ======================================================
+// ======================================
+// UPDATE CHAT BADGE
+// ======================================
 
-function adminChatKeydown(
-  event
-) {
+function updateAdminChatBadge() {
 
-  if (
-    event.key ===
-    "Enter" &&
-    !event.shiftKey
-  ) {
-
-    event.preventDefault();
+  const badge =
+    document.getElementById(
+      "chatUnreadBadge"
+    );
 
 
-    sendAdminChat(
-      event
+  if (!badge) {
+
+    return;
+
+  }
+
+
+  const unread =
+    adminChatConversations.reduce(
+      (total, chat) => {
+
+        return (
+          total +
+          Number(
+            chat.unread || 0
+          )
+        );
+
+      },
+      0
+    );
+
+
+  if (unread > 0) {
+
+    badge.textContent =
+      unread > 99
+        ? "99+"
+        : String(unread);
+
+
+    badge.classList.remove(
+      "hidden"
+    );
+
+
+  } else {
+
+    badge.textContent =
+      "0";
+
+
+    badge.classList.add(
+      "hidden"
     );
 
   }
@@ -1561,9 +1873,9 @@ function adminChatKeydown(
 }
 
 
-// ======================================================
-// AUTO REFRESH CHAT
-// ======================================================
+// ======================================
+// START CHAT AUTO REFRESH
+// ======================================
 
 function startAdminChatPolling() {
 
@@ -1572,7 +1884,7 @@ function startAdminChatPolling() {
 
   adminChatTimer =
     setInterval(
-      function () {
+      () => {
 
         const section =
           document.getElementById(
@@ -1602,15 +1914,13 @@ function startAdminChatPolling() {
 }
 
 
-// ======================================================
-// STOP AUTO REFRESH
-// ======================================================
+// ======================================
+// STOP CHAT AUTO REFRESH
+// ======================================
 
 function stopAdminChatPolling() {
 
-  if (
-    adminChatTimer
-  ) {
+  if (adminChatTimer) {
 
     clearInterval(
       adminChatTimer
@@ -1625,112 +1935,11 @@ function stopAdminChatPolling() {
 }
 
 
-// ======================================================
-// UPDATE UNREAD BADGE
-// ======================================================
-
-function updateAdminChatBadge(
-  data = {}
-) {
-
-  const badge =
-    document.getElementById(
-      "chatUnreadBadge"
-    );
-
-
-  if (!badge) {
-
-    return;
-
-  }
-
-
-  let unread =
-    Number(
-
-      data.unread ??
-
-      data.unreadCount ??
-
-      data.totalUnread
-
-    );
-
-
-  if (
-    !Number.isFinite(
-      unread
-    )
-  ) {
-
-    unread =
-      adminChatConversations.reduce(
-        function (
-          total,
-          chat
-        ) {
-
-          const value =
-            Number(
-
-              chat.unread ??
-
-              chat.unreadAdmin ??
-
-              chat.unread_count ??
-
-              (
-                String(
-                  chat.readAdmin ||
-                  chat.READ_ADMIN ||
-                  ""
-                ).toUpperCase() ===
-                "NO"
-                  ? 1
-                  : 0
-              )
-
-            ) || 0;
-
-
-          return (
-            total +
-            value
-          );
-
-        },
-
-        0
-      );
-
-  }
-
-
-  badge.textContent =
-
-    unread > 99
-      ? "99+"
-      : String(
-          unread
-        );
-
-
-  badge.classList.toggle(
-    "hidden",
-    unread <= 0
-  );
-
-}
-
-
-// ======================================================
+// ======================================
 // FORMAT CHAT TIME
-// ======================================================
+// ======================================
 
-function formatChatTime(
-  value
-) {
+function formatChatTime(value) {
 
   if (!value) {
 
@@ -1780,13 +1989,11 @@ function formatChatTime(
 }
 
 
-// ======================================================
-// CHAT ERROR
-// ======================================================
+// ======================================
+// SHOW CHAT ERROR
+// ======================================
 
-function showAdminChatError(
-  text
-) {
+function showAdminChatError(text) {
 
   const box =
     document.getElementById(
@@ -1794,26 +2001,29 @@ function showAdminChatError(
     );
 
 
-  if (box) {
+  if (!box) {
 
-    box.innerHTML =
-
-      '<div class="error">' +
-
-      escapeHTML(
-        text
-      ) +
-
-      '</div>';
+    return;
 
   }
+
+
+  box.innerHTML =
+
+    '<div class="error">' +
+
+    escapeHTML(
+      text
+    ) +
+
+    '</div>';
 
 }
 
 
-// ======================================================
+// ======================================
 // CLEAR CHAT ERROR
-// ======================================================
+// ======================================
 
 function clearAdminChatError() {
 
@@ -1825,495 +2035,22 @@ function clearAdminChatError() {
 
   if (box) {
 
-    box.innerHTML = "";
+    box.innerHTML =
+      "";
 
   }
 
 }
 
 
-// ======================================================
-// STUDENTS
-// ======================================================
-
-async function loadStudents() {
-
-  const table =
-    document.getElementById(
-      "studentTableBody"
-    );
-
-
-  if (!table) {
-
-    return;
-
-  }
-
-
-  try {
-
-    const data =
-      await apiRequest(
-        "getStudents"
-      );
-
-
-    if (!data.success) {
-
-      handleApiFailure(
-        data
-      );
-
-      return;
-
-    }
-
-
-    allStudents =
-      Array.isArray(
-        data.students
-      )
-        ? data.students
-        : [];
-
-
-    renderStudents(
-      allStudents
-    );
-
-  }
-  catch (error) {
-
-    console.error(
-      "Load students:",
-      error
-    );
-
-  }
-
-}
-
-
-// ======================================================
-// RENDER STUDENTS
-// ======================================================
-
-function renderStudents(
-  students
-) {
-
-  const table =
-    document.getElementById(
-      "studentTableBody"
-    );
-
-
-  if (!table) {
-
-    return;
-
-  }
-
-
-  table.innerHTML = "";
-
-
-  if (!students.length) {
-
-    table.innerHTML =
-
-      '<tr>' +
-
-      '<td colspan="6">' +
-
-      'Tiada rekod murid.' +
-
-      '</td>' +
-
-      '</tr>';
-
-
-    return;
-
-  }
-
-
-  students.forEach(
-    function (
-      student
-    ) {
-
-      const row =
-        document.createElement(
-          "tr"
-        );
-
-
-      row.innerHTML =
-
-        "<td>" +
-        escapeHTML(
-          student.nama ||
-          student.NAMA ||
-          ""
-        ) +
-        "</td>" +
-
-        "<td>" +
-        escapeHTML(
-          student.nokp ||
-          student.NO_KP ||
-          student.ic ||
-          ""
-        ) +
-        "</td>" +
-
-        "<td>" +
-        escapeHTML(
-          student.kelas ||
-          student.KELAS ||
-          ""
-        ) +
-        "</td>" +
-
-        "<td>" +
-        escapeHTML(
-          student.delima ||
-          student.ID_DELIMA ||
-          student.email ||
-          ""
-        ) +
-        "</td>" +
-
-        "<td>" +
-        escapeHTML(
-          student.pin ||
-          student.PIN ||
-          ""
-        ) +
-        "</td>";
-
-
-      table.appendChild(
-        row
-      );
-
-    }
-  );
-
-}
-
-
-// ======================================================
-// SEARCH STUDENT
-// ======================================================
-
-function searchStudent() {
-
-  const input =
-    document.getElementById(
-      "studentSearch"
-    );
-
-
-  if (!input) {
-
-    return;
-
-  }
-
-
-  const keyword =
-    input.value
-      .trim()
-      .toLowerCase();
-
-
-  if (!keyword) {
-
-    renderStudents(
-      allStudents
-    );
-
-    return;
-
-  }
-
-
-  const filtered =
-    allStudents.filter(
-      function (
-        student
-      ) {
-
-        return (
-          JSON.stringify(
-            student
-          )
-          .toLowerCase()
-          .includes(
-            keyword
-          )
-        );
-
-      }
-    );
-
-
-  renderStudents(
-    filtered
-  );
-
-}
-
-
-// ======================================================
-// TUTORIAL
-// ======================================================
-
-async function loadTutorials() {
-
-  const container =
-    document.getElementById(
-      "tutorialAdminList"
-    );
-
-
-  if (!container) {
-
-    return;
-
-  }
-
-
-  try {
-
-    const data =
-      await apiRequest(
-        "getTutorials"
-      );
-
-
-    if (!data.success) {
-
-      handleApiFailure(
-        data
-      );
-
-      return;
-
-    }
-
-
-    allTutorials =
-      Array.isArray(
-        data.tutorials
-      )
-        ? data.tutorials
-        : [];
-
-
-    renderTutorials(
-      allTutorials
-    );
-
-  }
-  catch (error) {
-
-    console.error(
-      "Tutorial:",
-      error
-    );
-
-  }
-
-}
-
-
-// ======================================================
-// RENDER TUTORIAL
-// ======================================================
-
-function renderTutorials(
-  tutorials
-) {
-
-  const container =
-    document.getElementById(
-      "tutorialAdminList"
-    );
-
-
-  if (!container) {
-
-    return;
-
-  }
-
-
-  container.innerHTML = "";
-
-
-  if (!tutorials.length) {
-
-    container.innerHTML =
-
-      '<div class="empty-state">' +
-
-      'Tiada tutorial.' +
-
-      '</div>';
-
-
-    return;
-
-  }
-
-
-  tutorials.forEach(
-    function (
-      tutorial
-    ) {
-
-      const item =
-        document.createElement(
-          "div"
-        );
-
-
-      item.className =
-        "admin-list-item";
-
-
-      item.innerHTML =
-
-        "<strong>" +
-
-        escapeHTML(
-          tutorial.title ||
-          tutorial.tajuk ||
-          ""
-        ) +
-
-        "</strong>" +
-
-        "<p>" +
-
-        escapeHTML(
-          tutorial.description ||
-          tutorial.penerangan ||
-          ""
-        ) +
-
-        "</p>";
-
-
-      container.appendChild(
-        item
-      );
-
-    }
-  );
-
-}
-
-
-// ======================================================
-// HELP
-// ======================================================
-
-async function loadHelp() {
-
-  const container =
-    document.getElementById(
-      "helpAdminContent"
-    );
-
-
-  if (!container) {
-
-    return;
-
-  }
-
-
-  try {
-
-    const data =
-      await apiRequest(
-        "getHelp"
-      );
-
-
-    if (!data.success) {
-
-      handleApiFailure(
-        data
-      );
-
-      return;
-
-    }
-
-
-    if (
-      data.help &&
-      typeof data.help ===
-      "object"
-    ) {
-
-      container.innerHTML =
-
-        "<pre>" +
-
-        escapeHTML(
-          JSON.stringify(
-            data.help,
-            null,
-            2
-          )
-        ) +
-
-        "</pre>";
-
-    }
-
-  }
-  catch (error) {
-
-    console.error(
-      "Help:",
-      error
-    );
-
-  }
-
-}
-
-
-// ======================================================
-// API REQUEST
-// ======================================================
+// ======================================
+// API
+// ======================================
 
 async function apiRequest(
   action,
   params = {}
 ) {
-
-  if (
-    !API_URL ||
-    API_URL.includes(
-      "MASUKKAN_URL"
-    )
-  ) {
-
-    throw new Error(
-      "API_URL belum ditetapkan."
-    );
-
-  }
-
 
   const url =
     new URL(
@@ -2327,9 +2064,7 @@ async function apiRequest(
   );
 
 
-  if (
-    sessionToken
-  ) {
+  if (sessionToken) {
 
     url.searchParams.set(
       "token",
@@ -2342,9 +2077,7 @@ async function apiRequest(
   Object.entries(
     params
   ).forEach(
-    function (
-      [key, value]
-    ) {
+    ([key, value]) => {
 
       if (
         value !== undefined &&
@@ -2353,7 +2086,7 @@ async function apiRequest(
 
         url.searchParams.set(
           key,
-          value
+          String(value)
         );
 
       }
@@ -2380,25 +2113,46 @@ async function apiRequest(
   if (!response.ok) {
 
     throw new Error(
-      "HTTP " +
+      "HTTP Error " +
       response.status
     );
 
   }
 
 
-  return await response.json();
+  const text =
+    await response.text();
+
+
+  try {
+
+    return JSON.parse(
+      text
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Invalid JSON:",
+      text
+    );
+
+
+    throw new Error(
+      "Server tidak mengembalikan JSON yang sah."
+    );
+
+  }
 
 }
 
 
-// ======================================================
-// API FAILURE
-// ======================================================
+// ======================================
+// HANDLE API FAILURE
+// ======================================
 
-function handleApiFailure(
-  data
-) {
+function handleApiFailure(data) {
 
   if (!data) {
 
@@ -2409,29 +2163,322 @@ function handleApiFailure(
 
   const message =
     String(
-      data.message ||
-      ""
+      data.message || ""
     ).toLowerCase();
 
 
   if (
-    data.unauthorized ||
+    data.unauthorized === true ||
+
     message.includes(
       "session"
     ) ||
+
     message.includes(
       "token"
     ) ||
+
     message.includes(
       "login"
     )
   ) {
 
+    logoutAdmin();
+
+  }
+
+}
+
+
+// ======================================
+// ESCAPE HTML
+// ======================================
+
+function escapeHTML(value) {
+
+  return String(
+    value ?? ""
+  )
+
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+
+    .replace(
+      /</g,
+      "&lt;"
+    )
+
+    .replace(
+      />/g,
+      "&gt;"
+    )
+
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+// ======================================
+// LOGOUT
+// ======================================
+
+function logoutAdmin() {
+
+  // Hentikan auto refresh Live Chat
+  stopAdminChatPolling();
+
+
+  // Reset Live Chat
+  activeAdminChatId = "";
+
+  adminChatConversations = [];
+
+
+  // Buang token
+  sessionToken = "";
+
+
+  localStorage.removeItem(
+    "delimaAdminToken"
+  );
+
+
+  // Reset paparan
+  const dashboardPage =
+    document.getElementById(
+      "dashboardPage"
+    );
+
+
+  const loginPage =
+    document.getElementById(
+      "loginPage"
+    );
+
+
+  if (dashboardPage) {
+
+    dashboardPage.classList.add(
+      "hidden"
+    );
+
+  }
+
+
+  if (loginPage) {
+
+    loginPage.classList.remove(
+      "hidden"
+    );
+
+  }
+
+
+  // Kosongkan password
+  const password =
+    document.getElementById(
+      "password"
+    );
+
+
+  if (password) {
+
+    password.value = "";
+
+  }
+
+
+  // Kosongkan mesej login
+  const loginMessage =
+    document.getElementById(
+      "loginMessage"
+    );
+
+
+  if (loginMessage) {
+
+    loginMessage.innerHTML = "";
+
+  }
+
+}
+
+
+// ======================================
+// RESTORE ADMIN SESSION
+// ======================================
+
+async function restoreAdminSession() {
+
+  const savedToken =
+    localStorage.getItem(
+      "delimaAdminToken"
+    );
+
+
+  if (!savedToken) {
+
+    showLoginPage();
+
+    return;
+
+  }
+
+
+  sessionToken =
+    savedToken;
+
+
+  try {
+
+    /*
+      Kita cuba request dashboard.
+      Jika token masih sah,
+      dashboard akan dipaparkan.
+    */
+
+    const data =
+      await apiRequest(
+        "getDashboard"
+      );
+
+
+    if (!data.success) {
+
+      sessionToken = "";
+
+
+      localStorage.removeItem(
+        "delimaAdminToken"
+      );
+
+
+      showLoginPage();
+
+      return;
+
+    }
+
+
+    const loginPage =
+      document.getElementById(
+        "loginPage"
+      );
+
+
+    const dashboardPage =
+      document.getElementById(
+        "dashboardPage"
+      );
+
+
+    if (loginPage) {
+
+      loginPage.classList.add(
+        "hidden"
+      );
+
+    }
+
+
+    if (dashboardPage) {
+
+      dashboardPage.classList.remove(
+        "hidden"
+      );
+
+    }
+
+
+    updateDashboardStats(
+      data
+    );
+
+
+    if (
+      Array.isArray(
+        data.students
+      )
+    ) {
+
+      allStudents =
+        data.students;
+
+
+      renderStudents(
+        allStudents
+      );
+
+    }
+
+
+    showAdminSection(
+      "students"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Restore session:",
+      error
+    );
+
+
     sessionToken = "";
 
 
-    sessionStorage.removeItem(
-      "adminSession"
+    localStorage.removeItem(
+      "delimaAdminToken"
+    );
+
+
+    showLoginPage();
+
+  }
+
+}
+
+
+// ======================================
+// SHOW LOGIN PAGE
+// ======================================
+
+function showLoginPage() {
+
+  const loginPage =
+    document.getElementById(
+      "loginPage"
+    );
+
+
+  const dashboardPage =
+    document.getElementById(
+      "dashboardPage"
+    );
+
+
+  if (dashboardPage) {
+
+    dashboardPage.classList.add(
+      "hidden"
+    );
+
+  }
+
+
+  if (loginPage) {
+
+    loginPage.classList.remove(
+      "hidden"
     );
 
   }
@@ -2439,81 +2486,316 @@ function handleApiFailure(
 }
 
 
-// ======================================================
-// SHOW MESSAGE
-// ======================================================
+// ======================================
+// LOGIN WITH ENTER KEY
+// ======================================
 
-function showMessage(
-  element,
-  text,
-  type = "info"
-) {
+function setupLoginEnterKey() {
 
-  if (!element) {
+  const username =
+    document.getElementById(
+      "username"
+    );
+
+
+  const password =
+    document.getElementById(
+      "password"
+    );
+
+
+  if (username) {
+
+    username.addEventListener(
+      "keydown",
+      function(event) {
+
+        if (
+          event.key ===
+          "Enter"
+        ) {
+
+          event.preventDefault();
+
+          loginAdmin();
+
+        }
+
+      }
+    );
+
+  }
+
+
+  if (password) {
+
+    password.addEventListener(
+      "keydown",
+      function(event) {
+
+        if (
+          event.key ===
+          "Enter"
+        ) {
+
+          event.preventDefault();
+
+          loginAdmin();
+
+        }
+
+      }
+    );
+
+  }
+
+}
+
+
+// ======================================
+// STUDENT SEARCH EVENT
+// ======================================
+
+function setupStudentSearch() {
+
+  const search =
+    document.getElementById(
+      "studentSearch"
+    );
+
+
+  if (!search) {
 
     return;
 
   }
 
 
-  element.innerHTML =
+  search.addEventListener(
+    "input",
+    function() {
 
-    '<div class="' +
-    escapeHTML(
-      type
-    ) +
-    '">' +
+      searchStudent();
 
-    escapeHTML(
-      text
-    ) +
-
-    '</div>';
-
-}
-
-
-// ======================================================
-// ESCAPE HTML
-// SECURITY AGAINST HTML INJECTION
-// ======================================================
-
-function escapeHTML(
-  value
-) {
-
-  return String(
-    value ?? ""
-  )
-
-  .replace(
-    /&/g,
-    "&amp;"
-  )
-
-  .replace(
-    /</g,
-    "&lt;"
-  )
-
-  .replace(
-    />/g,
-    "&gt;"
-  )
-
-  .replace(
-    /"/g,
-    "&quot;"
-  )
-
-  .replace(
-    /'/g,
-    "&#039;"
+    }
   );
 
 }
 
 
-// ======================================================
+// ======================================
+// CLASS FILTER EVENT
+// ======================================
+
+function setupClassFilter() {
+
+  const filter =
+    document.getElementById(
+      "classFilter"
+    );
+
+
+  if (!filter) {
+
+    return;
+
+  }
+
+
+  filter.addEventListener(
+    "change",
+    function() {
+
+      filterClass();
+
+    }
+  );
+
+}
+
+
+// ======================================
+// CHAT INPUT AUTO RESIZE
+// ======================================
+
+function setupAdminChatInput() {
+
+  const input =
+    document.getElementById(
+      "adminChatInput"
+    );
+
+
+  if (!input) {
+
+    return;
+
+  }
+
+
+  input.addEventListener(
+    "input",
+    function() {
+
+      this.style.height =
+        "auto";
+
+
+      this.style.height =
+        Math.min(
+          this.scrollHeight,
+          120
+        ) +
+        "px";
+
+    }
+  );
+
+}
+
+
+// ======================================
+// VISIBILITY CHANGE
+// ======================================
+
+function setupVisibilityListener() {
+
+  document.addEventListener(
+    "visibilitychange",
+    function() {
+
+      /*
+        Jika admin kembali ke tab browser
+        semasa Live Chat dibuka,
+        refresh mesej terus.
+      */
+
+      if (
+        document.visibilityState ===
+        "visible"
+      ) {
+
+        const chatSection =
+          document.getElementById(
+            "chatSection"
+          );
+
+
+        if (
+          chatSection &&
+          !chatSection.classList.contains(
+            "hidden"
+          ) &&
+          sessionToken
+        ) {
+
+          loadAdminChats(
+            false
+          );
+
+        }
+
+      }
+
+    }
+  );
+
+}
+
+
+// ======================================
+// ONLINE EVENT
+// ======================================
+
+function setupOnlineListener() {
+
+  window.addEventListener(
+    "online",
+    function() {
+
+      if (!sessionToken) {
+
+        return;
+
+      }
+
+
+      const chatSection =
+        document.getElementById(
+          "chatSection"
+        );
+
+
+      if (
+        chatSection &&
+        !chatSection.classList.contains(
+          "hidden"
+        )
+      ) {
+
+        loadAdminChats(
+          false
+        );
+
+      }
+
+    }
+  );
+
+}
+
+
+// ======================================
+// INITIALIZE ADMIN
+// ======================================
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function() {
+
+    console.log(
+      "Portal Pengurusan DELIMa Admin"
+    );
+
+
+    setupLoginEnterKey();
+
+
+    setupStudentSearch();
+
+
+    setupClassFilter();
+
+
+    setupAdminChatInput();
+
+
+    setupVisibilityListener();
+
+
+    setupOnlineListener();
+
+
+    restoreAdminSession();
+
+  }
+);
+
+
+// ======================================
+// CLEANUP BEFORE PAGE CLOSE
+// ======================================
+
+window.addEventListener(
+  "beforeunload",
+  function() {
+
+    stopAdminChatPolling();
+
+  }
+);
+
+
+// ======================================
 // END ADMIN.JS
-// ======================================================
+// ======================================
