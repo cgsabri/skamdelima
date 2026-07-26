@@ -1652,7 +1652,21 @@ if (chatLoginBtn) {
         chatConversation.classList.remove(
           "hidden"
         );
-
+        
+        // PAPAR NOTIFICATION SELEPAS CHAT SAH
+        
+        const notificationBox =
+          document.getElementById(
+            "parentNotificationBox"
+          );
+        
+        if (notificationBox) {
+        
+          notificationBox.classList.remove(
+            "hidden"
+          );
+        
+        }
 
         // kosongkan PIN selepas berjaya
         if (chatPin) {
@@ -2035,6 +2049,18 @@ function handleChatExpired() {
   liveChatId = "";
   liveChatSessionId = "";
 
+  const notificationBox =
+  document.getElementById(
+    "parentNotificationBox"
+  );
+
+if (notificationBox) {
+
+  notificationBox.classList.add(
+    "hidden"
+  );
+
+}
 
   sessionStorage.removeItem(
     "delima_chat_id"
