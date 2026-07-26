@@ -1615,10 +1615,15 @@ if (chatLoginBtn) {
         liveChatSessionId =
           data.sessionId;
 
-        window.delimaLiveChat = {
+       window.delimaLiveChat = {
   chatId: liveChatId,
   sessionId: liveChatSessionId
 };
+
+console.log(
+  "✅ delimaLiveChat SET:",
+  window.delimaLiveChat
+);
         
 
         // Simpan sesi dalam browser
