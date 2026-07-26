@@ -182,7 +182,16 @@ async function enableParentNotifications() {
       "parentNotificationStatus"
     );
 
+console.log(
+  "🔎 delimaLiveChat:",
+  window.delimaLiveChat
+);
 
+console.log(
+  "🔎 Notification permission:",
+  Notification.permission
+);
+  
   try {
 
     // ----------------------------------------------
