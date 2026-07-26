@@ -115,7 +115,14 @@
       </div>
 
     </div>
+<button
+  id="enableNotificationBtn"
+  type="button"
+  onclick="enableAdminNotifications()">
+  🔔 Aktifkan Notifikasi
+</button>
 
+<span id="notificationStatus"></span>
 
     <button
       class="logout-btn"
@@ -741,6 +748,236 @@
 
 
 <script src="admin.js?v=26"></script>
+
+  <script type="module">
+
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+
+import {
+  getMessaging,
+  getToken
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-messaging.js";
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAJKSa245Vio8tt-YMXHs3r6eTxt_SMjyQ",
+  authDomain: "skam-delima.firebaseapp.com",
+  projectId: "skam-delima",
+  storageBucket: "skam-delima.firebasestorage.app",
+  messagingSenderId: "894657583454",
+  appId: "1:894657583454:web:d900e56dc6d44e6cc6617cf"
+};
+
+
+const VAPID_KEY =
+  "BK5wdDWPAGVNoFvNTJE5jML_6J4vEeybLBSdYh5hyKM4ZL9eOMjWqwxr4TXA5Xg-uwspY6ndOnFX7d4CPvtF8iw";
+
+
+const firebaseApp =
+  initializeApp(firebaseConfig);
+
+const messaging =
+  getMessaging(firebaseApp);
+
+
+// ======================================
+// DEVICE ID
+// ======================================
+
+function getDeviceId() {
+
+  let id =
+    localStorage.getItem(
+      "delimaDeviceId"
+    );
+
+  if (!id) {
+
+    id =
+      crypto.randomUUID();
+
+    localStorage.setItem(
+      "delimaDeviceId",
+      id
+    );
+
+  }
+
+  return id;
+}
+
+
+// ======================================
+// PLATFORM
+// ======================================
+
+function getPlatform() {
+
+  const ua =
+    navigator.userAgent.toLowerCase();
+
+  if (
+    /iphone|ipad|ipod/.test(ua)
+  ) {
+    return "IOS";
+  }
+
+  if (
+    /android/.test(ua)
+  ) {
+    return "ANDROID";
+  }
+
+  return "WEB";
+}
+
+
+// ======================================
+// ADMIN NOTIFICATION
+// ======================================
+
+window.enableAdminNotifications =
+  async function () {
+
+    const button =
+      document.getElementById(
+        "enableNotificationBtn"
+      );
+
+    const status =
+      document.getElementById(
+        "notificationStatus"
+      );
+
+    try {
+
+      if (
+        !("Notification" in window) ||
+        !("serviceWorker" in navigator)
+      ) {
+
+        status.textContent =
+          "❌ Peranti tidak menyokong notifikasi.";
+
+        return;
+      }
+
+
+      button.disabled = true;
+
+      status.textContent =
+        "Meminta kebenaran...";
+
+
+      const permission =
+        await Notification.requestPermission();
+
+
+      if (
+        permission !== "granted"
+      ) {
+
+        status.textContent =
+          "⚠️ Kebenaran notifikasi tidak diberikan.";
+
+        button.disabled = false;
+
+        return;
+      }
+
+
+      status.textContent =
+        "Mendaftarkan peranti...";
+
+
+      const registration =
+        await navigator.serviceWorker.ready;
+
+
+      const token =
+        await getToken(
+          messaging,
+          {
+            vapidKey: VAPID_KEY,
+            serviceWorkerRegistration:
+              registration
+          }
+        );
+
+
+      if (!token) {
+
+        throw new Error(
+          "FCM token tidak diterima."
+        );
+
+      }
+
+
+      // ==================================
+      // REGISTER TOKEN KE APPS SCRIPT
+      // ==================================
+
+      const data =
+        await apiRequest(
+          "registerPushToken",
+          {
+            token: token,
+            role: "ADMIN",
+            deviceId:
+              getDeviceId(),
+            platform:
+              getPlatform()
+          }
+        );
+
+
+      if (!data.success) {
+
+        throw new Error(
+          data.message ||
+          "Token gagal disimpan."
+        );
+
+      }
+
+
+      localStorage.setItem(
+        "delimaAdminFcmToken",
+        token
+      );
+
+
+      button.textContent =
+        "🔔 Notifikasi Aktif";
+
+      status.textContent =
+        "✅ Peranti telah didaftarkan";
+
+      console.log(
+        "Admin push notification registered."
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Notification:",
+        error
+      );
+
+      status.textContent =
+        "❌ Gagal mengaktifkan notifikasi.";
+
+      button.disabled = false;
+
+    }
+
+  };
+
+</script>
 
 </body>
 </html>
