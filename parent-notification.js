@@ -182,49 +182,46 @@ async function enableParentNotifications() {
       "parentNotificationStatus"
     );
 
-console.log(
-  "🔎 delimaLiveChat:",
-  window.delimaLiveChat
-);
+  console.log(
+    "🔎 delimaLiveChat:",
+    window.delimaLiveChat
+  );
 
-console.log(
-  "🔎 Notification permission:",
-  Notification.permission
-);
-  
+  console.log(
+    "🔎 Notification permission:",
+    Notification.permission
+  );
+
   try {
 
-    // ----------------------------------------------
-    // Pastikan Parent sudah login chat
-    // ----------------------------------------------
+    // ======================================
+    // PASTIKAN PARENT SUDAH LOGIN CHAT
+    // ======================================
 
     const chat =
-  window.delimaLiveChat;
+      window.delimaLiveChat;
 
-if (
-  !chat ||
-  !chat.chatId ||
-  !chat.sessionId
-) {
-
-  if (status) {
-    status.textContent =
-      "⚠️ Sila mulakan Chat dengan Admin ICT dahulu.";
-  }
-
-  return;
-} {
+    if (
+      !chat ||
+      !chat.chatId ||
+      !chat.sessionId
+    ) {
 
       if (status) {
-
         status.textContent =
           "⚠️ Sila mulakan Chat dengan Admin ICT dahulu.";
-
       }
 
       return;
-
     }
+
+    console.log(
+      "✅ Chat validation passed:",
+      chat
+    );
+
+
+   
 
 
     // ----------------------------------------------
