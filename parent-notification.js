@@ -188,12 +188,22 @@ async function enableParentNotifications() {
     // Pastikan Parent sudah login chat
     // ----------------------------------------------
 
-    if (
-      typeof liveChatId === "undefined" ||
-      typeof liveChatSessionId === "undefined" ||
-      !liveChatId ||
-      !liveChatSessionId
-    ) {
+    const chat =
+  window.delimaLiveChat;
+
+if (
+  !chat ||
+  !chat.chatId ||
+  !chat.sessionId
+) {
+
+  if (status) {
+    status.textContent =
+      "⚠️ Sila mulakan Chat dengan Admin ICT dahulu.";
+  }
+
+  return;
+} {
 
       if (status) {
 
@@ -353,12 +363,12 @@ async function enableParentNotifications() {
 
       "&chatId=" +
       encodeURIComponent(
-        liveChatId
+        chat.chatId
       ) +
 
       "&sessionId=" +
       encodeURIComponent(
-        liveChatSessionId
+        chat.sessionId
       ) +
 
       "&deviceId=" +
@@ -421,7 +431,7 @@ async function enableParentNotifications() {
 
     localStorage.setItem(
       "delimaParentNotificationChatId",
-      liveChatId
+      chat.chatId
     );
 
 
@@ -448,7 +458,7 @@ async function enableParentNotifications() {
       "Parent notification registered:",
       {
         chatId:
-          liveChatId,
+          chat.chatId,
 
         platform:
           getParentPlatform()
