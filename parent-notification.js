@@ -300,10 +300,23 @@ if (
     // ==================================================
     // PERMISSION
     // ==================================================
+    console.log("🚀 Sampai sebelum requestPermission");
 
+console.log(
+  "Support:",
+  {
+    notification: "Notification" in window,
+    serviceWorker: "serviceWorker" in navigator,
+    ios: isIOSDevice(),
+    standalone: isStandalonePWA()
+  }
+);
     const permission =
       await Notification.requestPermission();
-
+console.log(
+  "🔔 Permission result:",
+  permission
+);
 
     if (permission !== "granted") {
 
