@@ -1,3 +1,4 @@
+console.log("🔥 parent-notification.js LOADED");
 // ======================================================
 // PORTAL DELIMA - PARENT PUSH NOTIFICATION
 // ======================================================
@@ -513,31 +514,53 @@ if (
 // BUTTON
 // ======================================================
 
-document.addEventListener(
-  "DOMContentLoaded",
-  function () {
+function setupParentNotificationButton() {
 
-    const button =
-      document.getElementById(
-        "enableParentNotificationBtn"
-      );
-
-
-    if (!button) {
-
-      console.warn(
-        "Parent notification button tidak dijumpai."
-      );
-
-      return;
-
-    }
-
-
-    button.addEventListener(
-      "click",
-      enableParentNotifications
+  const button =
+    document.getElementById(
+      "enableParentNotificationBtn"
     );
 
+  console.log(
+    "🔍 Notification button:",
+    button
+  );
+
+  if (!button) {
+    console.error(
+      "❌ Butang notification tidak dijumpai"
+    );
+    return;
   }
-);
+
+  button.addEventListener(
+    "click",
+    async function () {
+
+      console.log(
+        "🔔 BUTTON CLICKED"
+      );
+
+      await enableParentNotifications();
+
+    }
+  );
+
+  console.log(
+    "✅ Notification click listener READY"
+  );
+}
+
+
+if (document.readyState === "loading") {
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    setupParentNotificationButton
+  );
+
+} else {
+
+  setupParentNotificationButton();
+
+}
