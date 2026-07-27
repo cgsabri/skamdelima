@@ -1,4 +1,148 @@
-const CACHE_NAME = "skamdelima-v19";
+// ======================================================
+// FIREBASE CLOUD MESSAGING
+// ======================================================
+
+importScripts(
+  "https://www.gstatic.com/firebasejs/12.6.0/firebase-app-compat.js"
+);
+
+importScripts(
+  "https://www.gstatic.com/firebasejs/12.6.0/firebase-messaging-compat.js"
+);
+
+
+firebase.initializeApp({
+
+  apiKey:
+    "AIzaSyAJKSa245Vio8tt-YMXHs3r6eTxt_SMjyQ",
+
+  authDomain:
+    "skam-delima.firebaseapp.com",
+
+  projectId:
+    "skam-delima",
+
+  storageBucket:
+    "skam-delima.firebasestorage.app",
+
+  messagingSenderId:
+    "894657583454",
+
+  appId:
+    "1:894657583454:web:d900e56dc6d44e6cc6617cf"
+
+});
+
+
+const messaging =
+  firebase.messaging();
+
+
+messaging.onBackgroundMessage(
+  function(payload) {
+
+    console.log(
+      "[SW] Background message:",
+      payload
+    );
+
+    const title =
+      payload.notification?.title ||
+      "Portal DELIMa";
+
+    const options = {
+
+      body:
+        payload.notification?.body ||
+        "Anda mempunyai notifikasi baharu.",
+
+      icon:
+        "./assets/icon-192.png",
+
+      badge:
+        "./assets/icon-192.png",
+
+      data: {
+        url:
+          payload.fcmOptions?.link ||
+          payload.data?.url ||
+          "./admin.html"
+      }
+
+    };
+
+
+    return self.registration
+      .showNotification(
+        title,
+        options
+      );
+
+  }
+);
+
+
+// ======================================================
+// KLIK NOTIFICATION
+// ======================================================
+
+self.addEventListener(
+  "notificationclick",
+  function(event) {
+
+    event.notification.close();
+
+    const targetUrl =
+      event.notification.data?.url ||
+      "./admin.html";
+
+
+    event.waitUntil(
+
+      clients.matchAll({
+        type: "window",
+        includeUncontrolled: true
+      })
+
+      .then(function(clientList) {
+
+        for (
+          const client of clientList
+        ) {
+
+          if (
+            "focus" in client
+          ) {
+
+            client.navigate(
+              targetUrl
+            );
+
+            return client.focus();
+
+          }
+
+        }
+
+
+        if (
+          clients.openWindow
+        ) {
+
+          return clients.openWindow(
+            targetUrl
+          );
+
+        }
+
+      })
+
+    );
+
+  }
+);
+
+const CACHE_NAME = "skamdelima-v20";
 
 const BASE = "/skamdelima/";
 
