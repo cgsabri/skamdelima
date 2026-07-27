@@ -93,8 +93,8 @@ self.addEventListener(
     event.notification.close();
 
     const targetUrl =
-      event.notification.data?.url ||
-      "./admin.html";
+  event.notification.data?.url ||
+  "./";
 
 
     event.waitUntil(
@@ -142,7 +142,7 @@ self.addEventListener(
   }
 );
 
-const CACHE_NAME = "skamdelima-v21";
+const CACHE_NAME = "skamdelima-v22";
 
 const BASE = "/skamdelima/";
 
