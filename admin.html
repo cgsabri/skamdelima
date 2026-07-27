@@ -122,6 +122,7 @@
   🔔 Aktifkan Notifikasi
 </button>
 
+    
 <span id="notificationStatus"></span>
 
     <button
@@ -976,6 +977,55 @@ window.enableAdminNotifications =
     }
 
   };
+
+    function restoreNotificationStatus() {
+
+  const button =
+    document.getElementById(
+      "enableNotificationBtn"
+    );
+
+  const status =
+    document.getElementById(
+      "notificationStatus"
+    );
+
+  if (!button || !status) {
+    return;
+  }
+
+  const savedToken =
+    localStorage.getItem(
+      "delimaAdminFcmToken"
+    );
+
+  if (
+    Notification.permission === "granted" &&
+    savedToken
+  ) {
+
+    button.textContent =
+      "🔔 Notifikasi Aktif";
+
+    button.disabled = true;
+
+    status.textContent =
+      "✅ Notifikasi aktif";
+
+  } else {
+
+    button.textContent =
+      "🔔 Aktifkan Notifikasi";
+
+    button.disabled = false;
+
+  }
+
+}
+
+
+// jalankan semasa page dibuka
+restoreNotificationStatus();
 
 </script>
 
